@@ -22,7 +22,8 @@ $('[data-login-id]').each(function(){
         'email': userEmail,
         'password' : userPassword
       }).then(function(response) {
-        _this.loginPV = response;
+        _this.loginPV.auth_token = response.auth_token;
+        _this.loginPV.email = response.email;
         Fliplet.Security.Storage.update().then(function(){
           return validateAppAccess();
         });
@@ -79,8 +80,8 @@ $('[data-login-id]').each(function(){
 
   function validateAppAccess(){
     return new Promise(function(resolve, reject){
-      getApps().then(function(apps) {
-        if(_.find(apps,{id: Fliplet.Env.get('appId')})) {
+      getApps().then(function(response) {
+        if(_.find(response.apps,{id: Fliplet.Env.get('appId')})) {
           return resolve();
         }
         return reject();
@@ -94,7 +95,7 @@ $('[data-login-id]').each(function(){
     return request({
       'method' : 'GET',
       'url' : 'v1/user',
-      'auth_token' : _this.loginPV.auth_token
+      'token' : _this.loginPV.auth_token
     });
   }
 
@@ -124,10 +125,9 @@ $('[data-login-id]').each(function(){
 
     if(Fliplet.Env.get('platform') === 'web'){
       return request({
-        url: 'v1/apps',
-        data: {
-          'auth_token' : _this.loginPV.auth_token
-        }
+        'method' : 'GET',
+        'url' : 'v1/apps',
+        'token' : _this.loginPV.auth_token
       });
     } else {
       return Fliplet.Apps.get();
