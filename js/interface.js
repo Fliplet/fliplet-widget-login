@@ -1,6 +1,6 @@
 var widgetId = Fliplet.Widget.getDefaultId();
 var data = Fliplet.Widget.getData(widgetId) || {};
-var fields = [''];
+$('#heading').val(data.heading);
 
 var linkActionProvider = Fliplet.Widget.open('com.fliplet.link', {
   // If provided, the iframe will be appended here,
@@ -35,7 +35,7 @@ linkActionProvider.then(function (result) {
 });
 
 function save(notifyComplete) {
-  
+  data.heading = $('#heading').val();
   Fliplet.Widget.save(data).then(function () {
     if (notifyComplete) {
       Fliplet.Widget.complete();
@@ -45,6 +45,10 @@ function save(notifyComplete) {
     }
   });
 }
+
+$('#heading').on('keyup change paste', $.debounce(function() {
+  save();
+}, 500));
 
 $('#help_tip').on('click', function() {
   alert("During beta, please use live chat and let us know what you need help with.");

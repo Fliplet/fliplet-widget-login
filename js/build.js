@@ -30,7 +30,7 @@ $('[data-login-id]').each(function(){
       }).then(function(){
         Fliplet.Navigate.to(_this.data.action);
       },function(){
-        alert("Not a valid Fliplet account login");
+        alert("Not a valid Fliplet account login with app access.");
       });
     } else {
       Fliplet.Native.Authentication.loginUser({
@@ -41,7 +41,7 @@ $('[data-login-id]').each(function(){
       }).then(function(){
         Fliplet.Navigate.to(_this.data.action);
       },function(){
-        navigator.alert("Not a valid Fliplet account login");
+        navigator.notification.alert("Not a valid Fliplet account login with app access.");
       });
     }
 
@@ -80,8 +80,8 @@ $('[data-login-id]').each(function(){
 
   function validateAppAccess(){
     return new Promise(function(resolve, reject){
-      getApps().then(function(response) {
-        if(_.find(response.apps,{id: Fliplet.Env.get('appId')})) {
+      getApps().then(function(apps) {
+        if(_.find(apps,{id: Fliplet.Env.get('appId')})) {
           return resolve();
         }
         return reject();
@@ -128,6 +128,10 @@ $('[data-login-id]').each(function(){
         'method' : 'GET',
         'url' : 'v1/apps',
         'token' : _this.loginPV.auth_token
+      }).then(function (response) {
+        return Promise.resolve(response.apps);
+      }, function (error) {
+        return Promise.reject(error);
       });
     } else {
       return Fliplet.Apps.get();
@@ -136,7 +140,20 @@ $('[data-login-id]').each(function(){
 
   if(Fliplet.Env.get('platform') === 'web') {
      init();
-    _this.$container.parent().on("fliplet_page_reloaded", init);
+    Fliplet.Studio.onEvent(function (event) {
+      if (event.detail.event === 'reload-widget-instance') {
+        setTimeout(function() {
+          $('[data-login-id=' + _this.id + ']').removeClass('hidden').removeClass('hidden');
+        },500)
+      }
+    });
+    _this.$container.on("fliplet_page_reloaded", function(){
+      if(Fliplet.Env.get('interact ')) {
+        setTimeout(function() {
+          $('[data-login-id=' + _this.id + ']').removeClass('hidden').removeClass('hidden');
+        },500)
+      }
+    });
   } else {
     document.addEventListener("deviceready", init);
   }
