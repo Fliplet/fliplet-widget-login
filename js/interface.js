@@ -1,6 +1,7 @@
 var widgetId = Fliplet.Widget.getDefaultId();
 var data = Fliplet.Widget.getData(widgetId) || {};
-$('#login_heading').val(data.heading);
+var headingValue = data.heading || "Welcome to the login of this app";
+$('#login_heading').val(headingValue).trigger('change');
 
 var linkActionProvider = Fliplet.Widget.open('com.fliplet.link', {
   // If provided, the iframe will be appended here,
@@ -46,7 +47,7 @@ function save(notifyComplete) {
   });
 }
 
-$('#login_heading').on('keyup change paste', $.debounce(function() {
+$('#login_heading').on('keyup change paste blur', $.debounce(function() {
   save();
 }, 500));
 

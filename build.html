@@ -3,7 +3,7 @@
     <div class="loader">Loading...</div>
   </div>
   <div class="login-form-holder">
-    <h2>{{heading}}</h2>
+    <h2>{{#if heading}}{{heading}}{{else}}Welcome to the login of this app{{/if}}</h2>
     <p>Log in using your Fliplet access details.</p>
     <form class="login-form" data-login-form-id="{{id}}">
       <div class="form-group">
