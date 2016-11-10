@@ -12,38 +12,32 @@ $('[data-login-id]').each(function(){
     createdAt: null
   };
 
+  document.addEventListener('offline',function (){
+    _this.$container.addClass('offline');
+  });
+
+  scheduleCheck();
+
   _this.$container.on('submit', (function (event) {
     event.preventDefault();
 
     var userEmail = _this.$container.find('.email_input').val();
     var userPassword = _this.$container.find('.pass_input').val();
-    if(Fliplet.Env.get('platform') === 'web'){
-      login({
-        'email': userEmail,
-        'password' : userPassword
-      }).then(function(response) {
-        _this.loginPV.auth_token = response.auth_token;
-        _this.loginPV.email = response.email;
-        Fliplet.Security.Storage.update().then(function(){
-          return validateAppAccess();
-        });
-      }).then(function(){
-        Fliplet.Navigate.to(_this.data.action);
-      },function(){
-        alert("Not a valid Fliplet account login with app access.");
-      });
-    } else {
-      Fliplet.Native.Authentication.loginUser({
-        email: userEmail,
-        password: userPassword
-      }).then(function() {
+
+    login({
+      'email': userEmail,
+      'password' : userPassword
+    }).then(function(response) {
+      _this.loginPV.auth_token = response.auth_token;
+      _this.loginPV.email = response.email;
+      Fliplet.Security.Storage.update().then(function(){
         return validateAppAccess();
-      }).then(function(){
-        Fliplet.Navigate.to(_this.data.action);
-      },function(){
-        navigator.notification.alert("Not a valid Fliplet account login with app access.");
       });
-    }
+    }).then(function(){
+      Fliplet.Navigate.to(_this.data.action);
+    },function(){
+      alert("Not a valid Fliplet account login with app access.");
+    });
 
   }));
 
@@ -53,26 +47,21 @@ $('[data-login-id]').each(function(){
         function(data) {
           _this.loginPV = data;
 
-          if(Fliplet.Env.get('platform') === 'web') {
-            validateWeb().then(function(){
-              return validateAppAccess();
-            }).then(function(){
-              Fliplet.Navigate.to(_this.data.action);
-            },function(){
-              _this.$container.removeClass('hidden');
-            });
-          } else {
-            Fliplet.User.setUserDetails(_this.loginPV);
-            Fliplet.Native.Authentication.saveUserDetails(_this.loginPV).then(function(){
-              return Fliplet.Native.Authentication.verifyLogin();
-            }).then(function(){
-              return validateAppAccess();
-            }).then(function(){
-              Fliplet.Navigate.to(_this.data.action);
-            },function(){
-              _this.$container.removeClass('hidden');
-            })
+          if(!Fliplet.Navigator.isOnline && _this.loginPV.auth_token) {
+            Fliplet.Navigate.to(_this.data.action);
+            return;
           }
+          if(_this.loginPV.auth_token === "") {
+            _this.$container.removeClass('hidden');
+            return;
+          }
+          validateWeb().then(function(){
+            return validateAppAccess();
+          }).then(function(){
+            Fliplet.Navigate.to(_this.data.action);
+          },function(){
+            _this.$container.removeClass('hidden');
+          });
         }
       );
     });
@@ -138,8 +127,26 @@ $('[data-login-id]').each(function(){
     }
   }
 
+  function scheduleCheck(){
+    setTimeout(function(){
+      if(Fliplet.Navigator.isOnline){
+        _this.$container.removeClass('offline');
+        return
+      }
+      scheduleCheck();
+    },500);
+  }
+
   if(Fliplet.Env.get('platform') === 'web') {
-     init();
+
+    if(Fliplet.Env.get('interact')) {
+      setTimeout(function() {
+        $('[data-login-id=' + _this.id + ']').removeClass('hidden').removeClass('hidden');
+      },500)
+    }else {
+      init();
+    }
+
     Fliplet.Studio.onEvent(function (event) {
       if (event.detail.event === 'reload-widget-instance') {
         setTimeout(function() {
@@ -148,7 +155,7 @@ $('[data-login-id]').each(function(){
       }
     });
     _this.$container.on("fliplet_page_reloaded", function(){
-      if(Fliplet.Env.get('interact ')) {
+      if(Fliplet.Env.get('interact')) {
         setTimeout(function() {
           $('[data-login-id=' + _this.id + ']').removeClass('hidden').removeClass('hidden');
         },500)
