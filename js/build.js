@@ -21,8 +21,8 @@ $('[data-login-id]').each(function(){
   _this.$container.on('submit', (function (event) {
     event.preventDefault();
 
-    var userEmail = _this.$container.find('.email_input').val();
-    var userPassword = _this.$container.find('.pass_input').val();
+    var userEmail = _this.$container.find('.login_email').val();
+    var userPassword = _this.$container.find('.login_password').val();
 
     login({
       'email': userEmail,
@@ -52,7 +52,10 @@ $('[data-login-id]').each(function(){
             return;
           }
           if(_this.loginPV.auth_token === "") {
-            _this.$container.removeClass('hidden');
+            _this.$container.find('.login-loader-holder').fadeOut(100);
+            setTimeout(function() {
+              _this.$container.find('.login-form-holder').fadeIn(300);
+            }, 100);
             return;
           }
           validateWeb().then(function(){
@@ -60,7 +63,10 @@ $('[data-login-id]').each(function(){
           }).then(function(){
             Fliplet.Navigate.to(_this.data.action);
           },function(){
-            _this.$container.removeClass('hidden');
+            _this.$container.find('.login-loader-holder').fadeOut(100);
+            setTimeout(function() {
+              _this.$container.find('.login-form-holder').fadeIn(300);
+            }, 100);
           });
         }
       );
