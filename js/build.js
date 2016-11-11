@@ -14,9 +14,9 @@ $('[data-login-id]').each(function(){
 
   document.addEventListener('offline',function (){
     _this.$container.addClass('offline');
+    scheduleCheck();
   });
 
-  scheduleCheck();
 
   _this.$container.on('submit', (function (event) {
     event.preventDefault();
@@ -135,7 +135,7 @@ $('[data-login-id]').each(function(){
 
   function scheduleCheck(){
     setTimeout(function(){
-      if(Fliplet.Navigator.isOnline){
+      if(Fliplet.Navigator.isOnline()){
         _this.$container.removeClass('offline');
         return
       }
