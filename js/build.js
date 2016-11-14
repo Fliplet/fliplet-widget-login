@@ -13,7 +13,7 @@ $('[data-login-id]').each(function(){
   };
 
   document.addEventListener('offline',function (){
-    _this.$container.addClass('offline');
+    _this.$container.addClass('login-offline');
     scheduleCheck();
   });
 
@@ -137,7 +137,7 @@ $('[data-login-id]').each(function(){
   function scheduleCheck(){
     setTimeout(function(){
       if(Fliplet.Navigator.isOnline()){
-        _this.$container.removeClass('offline');
+        _this.$container.removeClass('login-offline');
         return
       }
       scheduleCheck();

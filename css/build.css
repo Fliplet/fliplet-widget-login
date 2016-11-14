@@ -75,7 +75,7 @@ input.form-control:focus {
 	border-bottom: 2px solid #204d74;
 }
 
-.offline .btn-login {
+.login-offline .btn-login {
 	background-color: #d6d6d6;
 	border-bottom: 2px solid #c1c1c1;
 	pointer-events: none;
@@ -89,6 +89,17 @@ input.form-control:focus {
 
 .login-error-holder p {
 	margin-bottom: 0;
+}
+
+.login-offline-notification {
+	text-align: center;
+	color: #fff;
+	background-color: #b10000;
+	display: none;
+}
+
+.login-offline .login-offline-notification {
+	display: block;
 }
 /* LOADER */
 /*.login-loader-holder {
