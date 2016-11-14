@@ -21,6 +21,8 @@ $('[data-login-id]').each(function(){
   _this.$container.on('submit', (function (event) {
     event.preventDefault();
 
+    $('.login-error-holder').removeClass('show');
+
     var userEmail = _this.$container.find('.login_email').val();
     var userPassword = _this.$container.find('.login_password').val();
 
@@ -36,7 +38,7 @@ $('[data-login-id]').each(function(){
     }).then(function(){
       Fliplet.Navigate.to(_this.data.action);
     },function(){
-      alert("Not a valid Fliplet account login with app access.");
+      $('.login-error-holder').addClass('show');
     });
 
   }));

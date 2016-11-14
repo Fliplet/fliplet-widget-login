@@ -80,6 +80,16 @@ input.form-control:focus {
 	border-bottom: 2px solid #c1c1c1;
 	pointer-events: none;
 }
+
+.login-error-holder {
+	margin-top: 1em;
+	color: #b10000;
+	display: none;
+}
+
+.login-error-holder p {
+	margin-bottom: 0;
+}
 /* LOADER */
 /*.login-loader-holder {
 	position: fixed;
