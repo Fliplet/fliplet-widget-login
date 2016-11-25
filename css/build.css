@@ -1,3 +1,105 @@
+/* Buttons */
+.btn-primary {
+	display: block;
+	clear: both;
+	width: 100%;
+	padding: 10px 16px;
+	font-size: 18px;
+	line-height: 24px;
+	border: none;
+	text-align: center;
+	cursor: pointer;
+	border-radius: 25px;
+	background-color: #337ab7;
+	border: 2px solid #337ab7;
+}
+
+.btn-secondary {
+	display: block;
+	clear: both;
+	width: 100%;
+	padding: 10px 16px;
+	font-size: 18px;
+	line-height: 24px;
+	border: none;
+	border-radius: 6px;
+	text-align: center;
+	cursor: pointer;
+	border-radius: 25px;
+	background-color: transparent;
+	border: 2px solid #337ab7;
+	color: #337ab7;
+}
+
+.btn-primary:focus,
+.btn-primary:hover,
+.btn-secondary:focus,
+.btn-secondary:hover,
+.btn:active:focus {
+	outline: none;
+}
+
+.btn-primary:active:focus,
+.btn-primary:active:hover {
+	border: 2px solid #286090;
+}
+
+.btn-primary:active,
+.btn-primary:focus,
+.btn-primary:hover {
+	border: 2px solid #286090;
+}
+
+.btn-secondary:active:focus,
+.btn-secondary:active:hover {
+	background-color: #337ab7;
+	color: #FFFFFF;
+}
+
+.btn-secondary:active,
+.btn-secondary:focus,
+.btn-secondary:hover {
+	color: #337ab7;
+}
+
+.btn-danger {
+	display: block;
+	clear: both;
+	width: 100%;
+	padding: 10px 16px;
+	font-size: 18px;
+	line-height: 1.33;
+	border: none;
+	border-radius: 6px;
+	text-align: center;
+	cursor: pointer;
+}
+
+.btn-danger:active,
+.btn-danger:active:focus,
+.btn-danger:active:hover,
+.btn-danger:focus,
+.btn-danger:hover {
+	color: #FFF;
+	background-color: #c9302c;
+	border-color: #c9302c;
+	outline: none;
+}
+@media (min-width:640px) {
+	.btn-primary,
+	.btn-secondary {
+		clear: none;
+		display: inline-block;
+		width: auto;
+		max-width: 100%;
+	}
+}
+
+.btn-link,
+a {
+	text-decoration: underline;
+}
+
 .login-form-holder {
 	display: none;
 }
@@ -44,25 +146,6 @@ input.form-control:focus {
 
 .login-button-holder {
 	text-align: center;
-}
-
-.btn-primary {
-	display: block;
-	clear: both;
-	width: 100%;
-	padding: 10px 16px;
-	font-size: 18px;
-	line-height: 1.33;
-	border: none;
-	border-radius: 6px;
-	text-align: center;
-	cursor: pointer;
-}
-
-.btn-primary:focus,
-.btn-primary:hover,
-.btn:active:focus {
-	outline: none;
 }
 
 .btn-login {
@@ -197,12 +280,5 @@ input.form-control:focus {
 @media screen and (min-width: 640px) {
 	.container-fluid {
 		padding: 0 12.5%;
-	}
-
-	.btn-primary {
-		clear: none;
-		display: inline-block;
-		width: auto;
-		max-width: 100%;
 	}
 }
