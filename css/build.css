@@ -150,6 +150,10 @@ input.form-control:focus {
 	left: 50%;
 	margin-left: -5px;
 }*/
+.login-loader-holder {
+	overflow: hidden;
+}
+
 .loader {
 	display: none;
 }
@@ -170,10 +174,10 @@ input.form-control:focus {
 	font-size: 2px;
 	position: relative;
 	text-indent: -9999em;
-	border-top: 1.1em solid rgba(255, 255, 255, 0.2);
-	border-right: 1.1em solid rgba(255, 255, 255, 0.2);
-	border-bottom: 1.1em solid rgba(255, 255, 255, 0.2);
-	border-left: 1.1em solid #FFFFFF;
+	border-top: 1.1em solid rgba(138, 138, 138, 0.2);
+	border-right: 1.1em solid rgba(138, 138, 138, 0.2);
+	border-bottom: 1.1em solid rgba(138, 138, 138, 0.2);
+	border-left: 1.1em solid #333;
 	-webkit-transform: translateZ(0);
 	-ms-transform: translateZ(0);
 	transform: translateZ(0);
