@@ -76,12 +76,14 @@ $('[data-login-id]').each(function(){
   }
 
   function validateAppAccess(){
-      return getApps().then(function(apps) {
-        if(_.find(apps,{id: Fliplet.Env.get('appId')})) {
-          return Promise.resolve();
-        }
-        return Promise.reject();
-      });
+    return getApps().then(function(apps) {
+      if(_.find(apps,function(app) {
+          return app.id === Fliplet.Env.get('appId') || app.productionAppId === Fliplet.Env.get('appId');
+        })) {
+        return Promise.resolve();
+      }
+      return Promise.reject();
+    });
 
   }
 
