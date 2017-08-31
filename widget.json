@@ -23,7 +23,7 @@
   "build": {
     "dependencies": [
       "fliplet-core",
-      "bootstrap-css",
+      "bootstrap",
       "lodash",
       "fliplet-security"
     ],

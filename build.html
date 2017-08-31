@@ -3,7 +3,7 @@
     <div class="loader">Loading...</div>
   </div>
   <div class="login-form-holder content-wrapper">
-    <div class="state present" data-state="auth">
+    <div class="state start" data-state="auth">
       <h2>{{#if heading}}{{heading}}{{else}}Welcome to the login of this app{{/if}}</h2>
       <p>Log in using your Fliplet access details.</p>
       <div class="login-offline-notification">Your device is offline</div>
@@ -41,9 +41,9 @@
         <p class="help-two-factor two-factor-not-valid text-danger text-center hidden">Please enter a valid code.</p>
         <p class="help-two-factor two-factor-enable-to-resend text-danger text-center hidden">Unable to resend your code, try again later.</p>
         <p class="help-two-factor two-factor-sent text-success text-center hidden">Two factor code sent.</p>
+        <button class="btn btn-primary link-button-primary two-factor-btn" type="submit" form="fliplet-two-factor" value="Submit">Authenticate</button>
       </form>
-      <button class="btn btn-primary link-button-primary two-factor-btn" type="submit" form="fliplet-two-factor" value="Submit">Authenticate</button>
-      <p class="resend-code-area"><span><a class="two-factor-resend hidden" >Send new code</a></span></p>
+      <div class="resend-code-area two-factor-resend btn btn-link hidden">Send new code</div>
     </div>
   </div>
 </div>

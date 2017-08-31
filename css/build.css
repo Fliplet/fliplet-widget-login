@@ -66,11 +66,6 @@
 	}
 }
 
-.btn-link,
-a {
-	text-decoration: underline;
-}
-
 .login-form-holder {
 	display: none;
 }
