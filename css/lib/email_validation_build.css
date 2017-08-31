@@ -1,0 +1,112 @@
+/* Buttons */
+.content-wrapper {
+	position: relative;
+	overflow: hidden;
+}
+
+.content-wrapper .state {
+	opacity: 0;
+	pointer-events: none;
+	-webkit-transform: translate3d(0, 0, 0);
+	transform: translate3d(0, 0, 0);
+}
+
+.content-wrapper .state.past {
+	-webkit-transform: translate3d(-105%, 0, 0);
+	transform: translate3d(-105%, 0, 0);
+	-webkit-transition: all 0.25s ease;
+	transition: all 0.25s ease;
+}
+
+.content-wrapper .state.present {
+	opacity: 1;
+	pointer-events: all;
+	-webkit-transition: all 0.25s ease;
+	transition: all 0.25s ease;
+}
+
+.content-wrapper .state.future {
+	-webkit-transform: translate3d(105%, 0, 0);
+	transform: translate3d(105%, 0, 0);
+	-webkit-transition: all 0.25s ease;
+	transition: all 0.25s ease;
+}
+
+.state .input-wrapper {
+	position: relative;
+}
+
+.state .back {
+	position: absolute;
+	top: 15px;
+	left: 0;
+	z-index: 1;
+	height: 51px;
+	line-height: 51px;
+	width: 40px;
+	color: #333;
+	cursor: pointer;
+}
+
+.form-group .email-error,
+.form-group .pin-error {
+	display: none;
+	font-size: 0.9em;
+	color: #a94442;
+	margin: 10px 0;
+}
+
+.form-group.has-error .email-error,
+.form-group.has-error .pin-error {
+	display: block;
+}
+
+.state .btn {
+	margin: 20px auto 0;
+	display: block;
+}
+
+.state .input-email {
+	color: #333;
+}
+
+.state .note {
+	margin: 10px 0;
+	font-size: 0.9em;
+	opacity: 0.5;
+}
+
+.state .have-code {
+	visibility: hidden;
+}
+
+.state.has-code .have-code {
+	visibility: visible;
+}
+
+.state .pin-resent {
+	display: none;
+	margin: 5px 0 0;
+}
+
+.state.new-pin .pin-resent {
+	display: block;
+}
+/* OFFLINE STATUS */
+
+body.device-offline .link-text {
+	color: #D4D4D4;
+}
+
+body.device-offline .link-button-primary {
+	color: #FFF;
+	background-color: #D4D4D4;
+  pointer-events: none;
+}
+/* END OFFLINE STATUS */
+@media (min-width: 640px) {
+	.state .input-wrapper {
+		max-width: 70%;
+		margin: 0 auto;
+	}
+}

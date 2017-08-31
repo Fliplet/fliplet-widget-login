@@ -1,5 +1,7 @@
 $('[data-login-id]').each(function(){
   var _this = this;
+  var TWO_FACTOR_ERROR_CODE = 428;
+  var ONE_TIME_2FA_OPTION = 'onetime';
   _this.$container = $(this);
   _this.id = _this.$container.attr('data-login-id');
   _this.data = Fliplet.Widget.getData(_this.id);
@@ -18,6 +20,22 @@ $('[data-login-id]').each(function(){
   });
 
 
+  // INITIATE FUNCTIONS
+  function calculateElHeight(el) {
+
+    if (el.hasClass('start')) {
+      if (havePinCode) {
+        $email_validation.find('.state[data-state=auth]').addClass('has-code');
+        $email_validation.find('.have-code').removeClass('hidden');
+      }
+      $email_validation.find('.state[data-state=auth]').removeClass('start').addClass('present');
+    }
+
+    var elementHeight = el.outerHeight();
+    el.parents('.content-wrapper').css('height', elementHeight);
+    el.css('overflow', 'auto');
+  }
+
   _this.$container.on('submit', (function (event) {
     event.preventDefault();
 
@@ -35,9 +53,15 @@ $('[data-login-id]').each(function(){
       return Fliplet.Security.Storage.update().then(function(){
         return validateAppAccess();
       });
-    }).then(function(){
+    }).then(function () {
       Fliplet.Navigate.to(_this.data.action);
-    },function(){
+    },function (err) {
+      if (err.status === TWO_FACTOR_ERROR_CODE) {
+        $('.state.present').removeClass('present').addClass('past');
+        $('.state[data-state=two-factor-code]').removeClass('future').addClass('present');
+        //calculateElHeight($('.state.present'));
+        return;
+      }
       $('.login-error-holder').addClass('show');
     });
 
@@ -77,7 +101,7 @@ $('[data-login-id]').each(function(){
 
   function validateAppAccess(){
     return getApps().then(function(apps) {
-      if(_.find(apps,function(app) {
+      if (_.find(apps,function(app) {
           return app.id === Fliplet.Env.get('appId') || app.productionAppId === Fliplet.Env.get('appId');
         })) {
         return Promise.resolve();
