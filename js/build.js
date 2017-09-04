@@ -31,8 +31,8 @@ $('[data-login-id]').each(function(){
     el.css('overflow', 'auto');
   }
 
-  $('.login-form').on('submit', (function (event) {
-    event.preventDefault();
+  $('.login-form').on('submit', function (e) {
+    e.preventDefault();
 
     $('.login-error-holder').removeClass('show');
 
@@ -64,7 +64,7 @@ $('[data-login-id]').each(function(){
       calculateElHeight($('.state.present'));
     });
 
-  }));
+  });
 
   $('span.back').on('click', function () {
     $('.state.present').removeClass('present').addClass('future');
@@ -91,7 +91,7 @@ $('[data-login-id]').each(function(){
   });
 
   $('.fliplet-two-factor').on('submit', function (e) {
-    event.preventDefault();
+    e.preventDefault();
     var twoFactorCode = $('.two-factor-code').val();
     if(twoFactorCode === '') {
       $('.two-factor-not-valid').removeClass('hidden');
@@ -100,13 +100,13 @@ $('[data-login-id]').each(function(){
     }
     $('.help-two-factor').addClass('hidden');
     loginOptions.twofactor = twoFactorCode;
-    login({
+    Fliplet.API.request({
       method: 'POST',
       url: 'v1/auth/login',
       data: loginOptions
     }).then(function (userData) {
-      _this.loginPV.auth_token = response.auth_token;
-      _this.loginPV.email = response.email;
+      _this.loginPV.auth_token = userData.auth_token;
+      _this.loginPV.email = userData.email;
       return Fliplet.Security.Storage.update().then(function(){
         return validateAppAccess();
       });
@@ -114,11 +114,12 @@ $('[data-login-id]').each(function(){
       Fliplet.Navigate.to(_this.data.action);
     }).catch(function () {
       $('.two-factor-not-valid').removeClass('hidden');
+      calculateElHeight($('.state[data-state=two-factor-code]'));
     });
   });
 
   function init(){
-    Fliplet.Security.Storage.init().then(function(){
+    Fliplet.Security.Storage.init().then(function () {
       Fliplet.Security.Storage.create(_this.pvName, dataStructure).then(
         function(data) {
           _this.loginPV = data;
@@ -244,7 +245,6 @@ $('[data-login-id]').each(function(){
       }
     });
   } else {
-    debugger;
     document.addEventListener("deviceready", init);
   }
 });

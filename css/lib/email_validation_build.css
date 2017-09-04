@@ -14,6 +14,10 @@
   transform: translate3d(0, 0, 0);
 }
 
+.content-wrapper .state .form-group {
+  text-align: left;
+}
+
 .content-wrapper .state.past {
   -webkit-transform: translate3d(-105%, 0, 0);
   transform: translate3d(-105%, 0, 0);
@@ -35,20 +39,31 @@
   transition: all 0.25s ease;
 }
 
+.form-control {
+  border-radius: 6px;
+  border: 1px solid #e4e9eb;
+  color: #333;
+  height: 44px;
+  -webkit-box-shadow: none;
+  box-shadow: none;
+}
+
 .state .input-wrapper {
   position: relative;
 }
 
 .state .back {
   position: absolute;
-  top: 17px;
-  left: 3px;
+  top: 50%;
+  margin-top: -10px;
+  left: 0px;
   z-index: 1;
-  height: 51px;
-  line-height: 51px;
+  height: 20px;
+  line-height: 20px;
   width: 40px;
   color: #333;
   cursor: pointer;
+  text-align: center;
 }
 
 .state p {

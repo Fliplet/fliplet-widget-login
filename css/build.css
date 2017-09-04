@@ -80,15 +80,9 @@
 	opacity: 0.7;
 }
 
-.login-form {
-	margin-top: 3em;
-}
-
-.form-group label {
-	color: #333;
-	font-size: 12px;
-	opacity: 0.4;
-	font-weight: normal;
+.login-form-holder .form-group label {
+  font-weight: normal;
+  font-size: 0.8em;
 }
 
 input.form-control {
@@ -180,6 +174,15 @@ input.form-control:focus {
 	-webkit-animation: load8 1.1s infinite linear;
 	animation: load8 1.1s infinite linear;
 }
+
+.fl-two-auth {
+  position: relative;
+}
+
+.fl-two-auth input {
+  padding-left: 50px;
+}
+
 @-webkit-keyframes load8 {
 	0% {
 		-webkit-transform: rotate(0deg);
