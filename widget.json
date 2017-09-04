@@ -23,11 +23,12 @@
   "build": {
     "dependencies": [
       "fliplet-core",
-      "bootstrap-css",
+      "bootstrap",
       "lodash",
       "fliplet-security"
     ],
     "assets": [
+      "css/lib/email_validation_build.css",
       "js/build.js",
       "css/build.css"
     ]

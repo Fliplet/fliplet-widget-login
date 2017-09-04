@@ -1,0 +1,134 @@
+/* Buttons */
+.content-wrapper {
+  position: relative;
+  overflow: hidden;
+}
+
+.content-wrapper .state {
+  position: absolute;
+  width: 100%;
+  text-align: center;
+  opacity: 0;
+  pointer-events: none;
+  -webkit-transform: translate3d(0, 0, 0);
+  transform: translate3d(0, 0, 0);
+}
+
+.content-wrapper .state .form-group {
+  text-align: left;
+}
+
+.content-wrapper .state.past {
+  -webkit-transform: translate3d(-105%, 0, 0);
+  transform: translate3d(-105%, 0, 0);
+  -webkit-transition: all 0.25s ease;
+  transition: all 0.25s ease;
+}
+
+.content-wrapper .state.present {
+  opacity: 1;
+  pointer-events: all;
+  -webkit-transition: all 0.25s ease;
+  transition: all 0.25s ease;
+}
+
+.content-wrapper .state.future {
+  -webkit-transform: translate3d(105%, 0, 0);
+  transform: translate3d(105%, 0, 0);
+  -webkit-transition: all 0.25s ease;
+  transition: all 0.25s ease;
+}
+
+.form-control {
+  border-radius: 6px;
+  border: 1px solid #e4e9eb;
+  color: #333;
+  height: 44px;
+  -webkit-box-shadow: none;
+  box-shadow: none;
+}
+
+.state .input-wrapper {
+  position: relative;
+}
+
+.state .back {
+  position: absolute;
+  top: 50%;
+  margin-top: -10px;
+  left: 0px;
+  z-index: 1;
+  height: 20px;
+  line-height: 20px;
+  width: 40px;
+  color: #333;
+  cursor: pointer;
+  text-align: center;
+}
+
+.state p {
+  margin: 30px 0 20px;
+}
+
+.form-group .email-error,
+.form-group .pin-error {
+  display: none;
+  font-size: 0.9em;
+  color: #a94442;
+  margin: 10px 0;
+}
+
+.form-group.has-error .email-error,
+.form-group.has-error .pin-error {
+  display: block;
+}
+
+.state .btn {
+  margin: 20px auto 0;
+  display: block;
+}
+
+.state .input-email {
+  color: #333;
+}
+
+.state .note {
+  margin: 10px 0;
+  font-size: 0.9em;
+  opacity: 0.5;
+}
+
+.state .have-code {
+  visibility: hidden;
+}
+
+.state.has-code .have-code {
+  visibility: visible;
+}
+
+.state .pin-resent {
+  display: none;
+  margin: 5px 0 0;
+}
+
+.state.new-pin .pin-resent {
+  display: block;
+}
+/* OFFLINE STATUS */
+
+body.device-offline .link-text {
+  color: #D4D4D4;
+}
+
+body.device-offline .link-button-primary {
+  color: #FFF;
+  background-color: #D4D4D4;
+  pointer-events: none;
+}
+/* END OFFLINE STATUS */
+@media (min-width: 640px) {
+  .state .input-wrapper {
+    max-width: 70%;
+    margin: 0 auto;
+  }
+}

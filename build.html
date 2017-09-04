@@ -2,26 +2,48 @@
   <div class="login-loader-holder animated">
     <div class="loader">Loading...</div>
   </div>
-  <div class="login-form-holder">
-    <h2>{{#if heading}}{{heading}}{{else}}Welcome to the login of this app{{/if}}</h2>
-    <p>Log in using your Fliplet access details.</p>
-    <div class="login-offline-notification">Your device is offline</div>
-    <form class="login-form" data-login-form-id="{{id}}">
-      <div class="form-group">
-        <label>Email address</label>
-        <input type="email" class="form-control login_email" required>
-      </div>
-      <div class="form-group">
-        <label>Password</label>
-        <input type="password" class="form-control login_password" required>
-      </div>
-      <div class="login-button-holder">
-        <input type="submit" class="btn btn-primary btn-login" value="Log in"/>
-      </div>
-      <div class="login-error-holder">
-        <p>Unfortunately you don't have access to the app.</p>
-        <p>Please contact the app Admin for more information.</p>
-      </div>
-    </form>
+  <div class="login-form-holder content-wrapper">
+    <div class="state start" data-state="auth">
+      <h2>{{#if heading}}{{heading}}{{else}}Welcome to the login of this app{{/if}}</h2>
+      <p>Log in using your Fliplet access details.</p>
+      <div class="login-offline-notification">Your device is offline</div>
+      <form class="login-form" data-login-form-id="{{id}}">
+        <div class="form-group">
+          <label>Email address</label>
+          <input type="email" class="form-control login_email" placeholder="Enter your email" required>
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" class="form-control login_password" placeholder="Enter your password" required>
+        </div>
+        <div class="login-button-holder">
+          <input type="submit" class="btn btn-primary btn-login" value="Log in"/>
+        </div>
+        <div class="login-error-holder">
+          <p>Unfortunately you don't have access to the app.</p>
+          <p>Please contact the app Admin for more information.</p>
+        </div>
+      </form>
+    </div>
+    <div class="state future" data-state="two-factor-code">
+      <h3 class="aligncenter">Authentication</h3>
+      <p>Your account uses two-factor authentication, so you'll need a verification code to access</p>
+      <form class="fliplet-two-factor">
+        <div class="form-group clearfix ">
+          <label>Enter your authentication code</label>
+          <div class="fl-two-auth">
+            <span class="fa fa-chevron-left back"></span>
+            <input type="text" class="form-control two-factor-code" name="two-factor" placeholder="Enter your authentication code" required>
+          </div>
+        </div>
+        <p class="help-two-factor two-factor-not-valid text-danger text-center hidden">Please enter a valid code.</p>
+        <p class="help-two-factor two-factor-enable-to-resend text-danger text-center hidden">Unable to resend your code, try again later.</p>
+        <p class="help-two-factor two-factor-sent text-success text-center hidden">Two factor code sent.</p>
+        <div class="login-button-holder">
+          <input type="submit" class="btn btn-primary btn-login two-factor-btn" value="Authenticate"/>
+        </div>
+      </form>
+      <div class="resend-code-area two-factor-resend btn btn-link hidden">Send new code</div>
+    </div>
   </div>
 </div>
