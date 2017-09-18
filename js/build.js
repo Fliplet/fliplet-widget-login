@@ -22,7 +22,7 @@ $('[data-login-id]').each(function() {
   });
 
   if (Fliplet.Navigate.query.error) {
-    $('.login-error-holder').html(Fliplet.Navigate.query.error);
+    _this.$container.find('.login-error-holder').html(Fliplet.Navigate.query.error);
   }
 
   // INITIATE FUNCTIONS
@@ -38,8 +38,8 @@ $('[data-login-id]').each(function() {
   $('.login-form').on('submit', function(e) {
     e.preventDefault();
 
-    $('.login-error-holder').removeClass('show');
-    $('.login-error-holder').html('');
+    _this.$container.find('.login-error-holder').removeClass('show');
+    _this.$container.find('.login-error-holder').html('');
 
     var userEmail = _this.$container.find('.login_email').val();
     var userPassword = _this.$container.find('.login_password').val();
@@ -65,8 +65,8 @@ $('[data-login-id]').each(function() {
         calculateElHeight($('.state.present'));
         return;
       }
-      $('.login-error-holder').html(genericErrorMessage);
-      $('.login-error-holder').addClass('show');
+      _this.$container.find('.login-error-holder').html(genericErrorMessage);
+      _this.$container.find('.login-error-holder').addClass('show');
       calculateElHeight($('.state.present'));
     });
 
