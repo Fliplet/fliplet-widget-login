@@ -45,29 +45,32 @@ $('[data-login-id]').each(function() {
     var userPassword = _this.$container.find('.login_password').val();
     loginOptions = {
       'email': userEmail,
-      'password': userPassword
+      'password': userPassword,
+      'session': true
     };
-    login(loginOptions).then(function(response) {
-      _this.loginPV.auth_token = response.auth_token;
-      _this.loginPV.email = response.email;
-      return Fliplet.Security.Storage.update().then(function() {
-        return validateAppAccess();
-      });
-    }).then(function() {
-      Fliplet.Navigate.to(_this.data.action);
-    }, function(err) {
-      if (err.status === TWO_FACTOR_ERROR_CODE) {
-        if (err.responseJSON.condition !== ONE_TIME_2FA_OPTION) {
-          $('.two-factor-resend').removeClass('hidden');
+    Fliplet.Session.get().then(function() {
+      login(loginOptions).then(function(response) {
+        _this.loginPV.auth_token = response.auth_token;
+        _this.loginPV.email = response.email;
+        return Fliplet.Security.Storage.update().then(function() {
+          return validateAppAccess();
+        });
+      }).then(function() {
+        Fliplet.Navigate.to(_this.data.action);
+      }, function(err) {
+        if (err.status === TWO_FACTOR_ERROR_CODE) {
+          if (err.responseJSON.condition !== ONE_TIME_2FA_OPTION) {
+            $('.two-factor-resend').removeClass('hidden');
+          }
+          $('.state.present').removeClass('present').addClass('past');
+          $('.state[data-state=two-factor-code]').removeClass('future').addClass('present');
+          calculateElHeight($('.state.present'));
+          return;
         }
-        $('.state.present').removeClass('present').addClass('past');
-        $('.state[data-state=two-factor-code]').removeClass('future').addClass('present');
+        _this.$container.find('.login-error-holder').html(genericErrorMessage);
+        _this.$container.find('.login-error-holder').addClass('show');
         calculateElHeight($('.state.present'));
-        return;
-      }
-      _this.$container.find('.login-error-holder').html(genericErrorMessage);
-      _this.$container.find('.login-error-holder').addClass('show');
-      calculateElHeight($('.state.present'));
+      });
     });
 
   });

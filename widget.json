@@ -25,7 +25,8 @@
       "fliplet-core",
       "bootstrap",
       "lodash",
-      "fliplet-security"
+      "fliplet-security",
+      "fliplet-session"
     ],
     "assets": [
       "css/lib/email_validation_build.css",
