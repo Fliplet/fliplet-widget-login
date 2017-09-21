@@ -44,9 +44,9 @@ $('[data-login-id]').each(function() {
     var userEmail = _this.$container.find('.login_email').val();
     var userPassword = _this.$container.find('.login_password').val();
     loginOptions = {
-      'email': userEmail,
-      'password': userPassword,
-      'session': true
+      email: userEmail,
+      password: userPassword,
+      passport: true
     };
     Fliplet.Session.get().then(function() {
       login(loginOptions).then(function(response) {
