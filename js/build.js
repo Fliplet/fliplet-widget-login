@@ -46,33 +46,32 @@ $('[data-login-id]').each(function() {
     loginOptions = {
       email: userEmail,
       password: userPassword,
+      session: true,
       passport: true
     };
-    Fliplet.Session.get().then(function() {
-      login(loginOptions).then(function(response) {
-        _this.loginPV.auth_token = response.auth_token;
-        _this.loginPV.email = response.email;
-        return Fliplet.Security.Storage.update().then(function() {
-          return validateAppAccess();
-        });
-      }).then(function() {
-        Fliplet.Navigate.to(_this.data.action);
-      }, function(err) {
-        if (err.status === TWO_FACTOR_ERROR_CODE) {
-          if (err.responseJSON.condition !== ONE_TIME_2FA_OPTION) {
-            $('.two-factor-resend').removeClass('hidden');
-          }
-          $('.state.present').removeClass('present').addClass('past');
-          $('.state[data-state=two-factor-code]').removeClass('future').addClass('present');
-          calculateElHeight($('.state.present'));
-          return;
-        }
-        _this.$container.find('.login-error-holder').html(genericErrorMessage);
-        _this.$container.find('.login-error-holder').addClass('show');
-        calculateElHeight($('.state.present'));
-      });
-    });
 
+    login(loginOptions).then(function(response) {
+      _this.loginPV.auth_token = response.auth_token;
+      _this.loginPV.email = response.email;
+      return Fliplet.Security.Storage.update().then(function() {
+        return validateAppAccess();
+      });
+    }).then(function() {
+      Fliplet.Navigate.to(_this.data.action);
+    }, function(err) {
+      if (err.status === TWO_FACTOR_ERROR_CODE) {
+        if (err.responseJSON.condition !== ONE_TIME_2FA_OPTION) {
+          $('.two-factor-resend').removeClass('hidden');
+        }
+        $('.state.present').removeClass('present').addClass('past');
+        $('.state[data-state=two-factor-code]').removeClass('future').addClass('present');
+        calculateElHeight($('.state.present'));
+        return;
+      }
+      _this.$container.find('.login-error-holder').html(genericErrorMessage);
+      _this.$container.find('.login-error-holder').addClass('show');
+      calculateElHeight($('.state.present'));
+    });
   });
 
   $('span.back').on('click', function() {
@@ -84,7 +83,7 @@ $('[data-login-id]').each(function() {
   $('.two-factor-resend').on('click', function() {
     $('.help-two-factor').addClass('hidden');
     calculateElHeight($('.state[data-state=two-factor-code]'));
-    return Fliplet.API.request({
+    return Fliplet.Session.run({
       method: 'POST',
       url: 'v1/auth/login',
       data: loginOptions
@@ -184,10 +183,10 @@ $('[data-login-id]').each(function() {
   }
 
   function login(options) {
-    return request({
-      'method': 'POST',
-      'url': 'v1/auth/login',
-      'data': options
+    return Fliplet.Session.run({
+      method: 'POST',
+      url: 'v1/auth/login',
+      data: options
     });
   }
 
