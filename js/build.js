@@ -44,9 +44,12 @@ $('[data-login-id]').each(function() {
     var userEmail = _this.$container.find('.login_email').val();
     var userPassword = _this.$container.find('.login_password').val();
     loginOptions = {
-      'email': userEmail,
-      'password': userPassword
+      email: userEmail,
+      password: userPassword,
+      session: true,
+      passport: true
     };
+
     login(loginOptions).then(function(response) {
       _this.loginPV.auth_token = response.auth_token;
       _this.loginPV.email = response.email;
@@ -69,7 +72,6 @@ $('[data-login-id]').each(function() {
       _this.$container.find('.login-error-holder').addClass('show');
       calculateElHeight($('.state.present'));
     });
-
   });
 
   $('span.back').on('click', function() {
@@ -81,7 +83,7 @@ $('[data-login-id]').each(function() {
   $('.two-factor-resend').on('click', function() {
     $('.help-two-factor').addClass('hidden');
     calculateElHeight($('.state[data-state=two-factor-code]'));
-    return Fliplet.API.request({
+    return Fliplet.Session.run({
       method: 'POST',
       url: 'v1/auth/login',
       data: loginOptions
@@ -181,10 +183,10 @@ $('[data-login-id]').each(function() {
   }
 
   function login(options) {
-    return request({
-      'method': 'POST',
-      'url': 'v1/auth/login',
-      'data': options
+    return Fliplet.Session.run({
+      method: 'POST',
+      url: 'v1/auth/login',
+      data: options
     });
   }
 
