@@ -57,6 +57,10 @@ $('[data-login-id]').each(function() {
         return validateAppAccess();
       });
     }).then(function() {
+      if (Fliplet.Env.get('disableSecurity')) {
+        return;
+      }
+      
       Fliplet.Navigate.to(_this.data.action);
     }, function(err) {
       if (err.status === TWO_FACTOR_ERROR_CODE) {
@@ -119,6 +123,10 @@ $('[data-login-id]').each(function() {
         return validateAppAccess();
       });
     }).then(function() {
+      if (Fliplet.Env.get('disableSecurity')) {
+        return;
+      }
+      
       Fliplet.Navigate.to(_this.data.action);
     }).catch(function() {
       $('.two-factor-not-valid').removeClass('hidden');
@@ -132,7 +140,7 @@ $('[data-login-id]').each(function() {
         function(data) {
           _this.loginPV = data;
 
-          if (!Fliplet.Navigator.isOnline && _this.loginPV.auth_token) {
+          if (!Fliplet.Navigator.isOnline && _this.loginPV.auth_token && !Fliplet.Env.get('disableSecurity')) {
             Fliplet.Navigate.to(_this.data.action);
             return;
           }
@@ -147,6 +155,10 @@ $('[data-login-id]').each(function() {
           validateWeb().then(function() {
             return validateAppAccess();
           }).then(function() {
+            if (Fliplet.Env.get('disableSecurity')) {
+              return;
+            }
+
             Fliplet.Navigate.to(_this.data.action);
           }, function() {
             _this.$container.find('.login-loader-holder').fadeOut(100);
