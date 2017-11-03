@@ -58,8 +58,8 @@ $('[data-login-id]').each(function() {
       });
     }).then(function() {
       Fliplet.Navigate.to(_this.data.action);
-    }, function(err) {
-      if (err.status === TWO_FACTOR_ERROR_CODE) {
+    }).catch(function(err) {
+      if (err && err.status === TWO_FACTOR_ERROR_CODE) {
         if (err.responseJSON.condition !== ONE_TIME_2FA_OPTION) {
           $('.two-factor-resend').removeClass('hidden');
         }
