@@ -6,15 +6,8 @@ $('[data-login-id]').each(function() {
   _this.$container = $(this);
   _this.id = _this.$container.attr('data-login-id');
   _this.data = Fliplet.Widget.getData(_this.id);
-
-  _this.pvName = 'login_component_' + _this.id;
-  var dataStructure = {
-      auth_token: '',
-      id: '',
-      email: '',
-      createdAt: null
-    },
-    loginOptions;
+  _this.pvName = 'fliplet_login_component';
+  var loginOptions;
 
   document.addEventListener('offline', function() {
     _this.$container.addClass('login-offline');
@@ -49,11 +42,16 @@ $('[data-login-id]').each(function() {
       session: true,
       passport: true
     };
-
     login(loginOptions).then(function(response) {
+      _this.loginPV.userRoleId = response.userRoleId;
       _this.loginPV.auth_token = response.auth_token;
       _this.loginPV.email = response.email;
-      return Fliplet.Security.Storage.update().then(function() {
+
+      return Fliplet.App.Storage.set(_this.pvName, {
+        userRoleId: response.userRoleId,
+        auth_token: response.auth_token,
+        email: response.email
+      }).then(function() {
         return validateAppAccess();
       });
     }).then(function() {
@@ -72,6 +70,7 @@ $('[data-login-id]').each(function() {
       _this.$container.find('.login-error-holder').addClass('show');
       calculateElHeight($('.state.present'));
     });
+
   });
 
   $('span.back').on('click', function() {
@@ -113,9 +112,15 @@ $('[data-login-id]').each(function() {
       url: 'v1/auth/login',
       data: loginOptions
     }).then(function(userData) {
+      _this.loginPV.userRoleId = userData.userRoleId;
       _this.loginPV.auth_token = userData.auth_token;
       _this.loginPV.email = userData.email;
-      return Fliplet.Security.Storage.update().then(function() {
+
+      return Fliplet.App.Storage.set(_this.pvName, {
+        auth_token: userData.auth_token,
+        userRoleId: userData.userRoleId,
+        email: userData.email
+      }).then(function() {
         return validateAppAccess();
       });
     }).then(function() {
@@ -127,36 +132,34 @@ $('[data-login-id]').each(function() {
   });
 
   function init() {
-    Fliplet.Security.Storage.init().then(function() {
-      Fliplet.Security.Storage.create(_this.pvName, dataStructure).then(
-        function(data) {
-          _this.loginPV = data;
+    Fliplet.App.Storage.get(_this.pvName).then(function(data) {
+      _this.loginPV = data || {};
 
-          if (!Fliplet.Navigator.isOnline && _this.loginPV.auth_token) {
-            Fliplet.Navigate.to(_this.data.action);
-            return;
-          }
-          if (_this.loginPV.auth_token === "") {
-            _this.$container.find('.login-loader-holder').fadeOut(100);
-            setTimeout(function() {
-              _this.$container.find('.login-form-holder').fadeIn(300);
-              calculateElHeight($('.state.start'));
-            }, 100);
-            return;
-          }
-          validateWeb().then(function() {
-            return validateAppAccess();
-          }).then(function() {
-            Fliplet.Navigate.to(_this.data.action);
-          }, function() {
-            _this.$container.find('.login-loader-holder').fadeOut(100);
-            setTimeout(function() {
-              _this.$container.find('.login-form-holder').fadeIn(300);
-              calculateElHeight($('.state.start'));
-            }, 100);
-          });
+      if (data && _this.loginPV) {
+        if (!Fliplet.Navigator.isOnline && _this.loginPV.auth_token) {
+          Fliplet.Navigate.to(_this.data.action);
+          return;
         }
-      );
+
+        validateWeb().then(function() {
+          return validateAppAccess();
+        }).then(function() {
+          Fliplet.Navigate.to(_this.data.action);
+        }, function() {
+          _this.$container.find('.login-loader-holder').fadeOut(100);
+          setTimeout(function() {
+            _this.$container.find('.login-form-holder').fadeIn(300);
+            calculateElHeight($('.state.start'));
+          }, 100);
+        });
+      } else {
+        _this.$container.find('.login-loader-holder').fadeOut(100);
+        setTimeout(function() {
+          _this.$container.find('.login-form-holder').fadeIn(300);
+          calculateElHeight($('.state.start'));
+        }, 100);
+        return;
+      }
     });
   }
 
@@ -176,9 +179,9 @@ $('[data-login-id]').each(function() {
   function validateWeb() {
     //validate token
     return request({
-      'method': 'GET',
-      'url': 'v1/user',
-      'token': _this.loginPV.auth_token
+      method: 'GET',
+      url: 'v1/user',
+      token: _this.loginPV.auth_token
     });
   }
 
