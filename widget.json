@@ -25,7 +25,6 @@
       "fliplet-core",
       "bootstrap",
       "lodash",
-      "fliplet-security",
       "fliplet-session"
     ],
     "assets": [
