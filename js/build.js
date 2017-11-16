@@ -6,7 +6,15 @@ $('[data-login-id]').each(function() {
   _this.$container = $(this);
   _this.id = _this.$container.attr('data-login-id');
   _this.data = Fliplet.Widget.getData(_this.id);
-  _this.pvName = 'fliplet_login_component';
+  _this.pvNameStorage = 'fliplet_login_component';
+  _this.pvName = 'login_component_' + _this.id;
+  var dataStructure = {
+    auth_token: '',
+    id: '',
+    email: '',
+    userRoleId: '',
+    createdAt: null
+  }
   var loginOptions;
 
   document.addEventListener('offline', function() {
@@ -47,12 +55,14 @@ $('[data-login-id]').each(function() {
       _this.loginPV.auth_token = response.auth_token;
       _this.loginPV.email = response.email;
 
-      return Fliplet.App.Storage.set(_this.pvName, {
-        userRoleId: response.userRoleId,
-        auth_token: response.auth_token,
-        email: response.email
-      }).then(function() {
-        return validateAppAccess();
+      return Fliplet.Security.Storage.update().then(function() {
+        return Fliplet.App.Storage.set(_this.pvNameStorage, {
+          userRoleId: response.userRoleId,
+          auth_token: response.auth_token,
+          email: response.email
+        }).then(function() {
+          return validateAppAccess();
+        });
       });
     }).then(function() {
       if (Fliplet.Env.get('disableSecurity')) {
@@ -118,13 +128,14 @@ $('[data-login-id]').each(function() {
       _this.loginPV.userRoleId = userData.userRoleId;
       _this.loginPV.auth_token = userData.auth_token;
       _this.loginPV.email = userData.email;
-
-      return Fliplet.App.Storage.set(_this.pvName, {
-        auth_token: userData.auth_token,
-        userRoleId: userData.userRoleId,
-        email: userData.email
-      }).then(function() {
-        return validateAppAccess();
+      return Fliplet.Security.Storage.update().then(function() {
+        return Fliplet.App.Storage.set(_this.pvNameStorage, {
+          auth_token: userData.auth_token,
+          userRoleId: userData.userRoleId,
+          email: userData.email
+        }).then(function() {
+          return validateAppAccess();
+        });
       });
     }).then(function() {
       if (Fliplet.Env.get('disableSecurity')) {
@@ -139,38 +150,49 @@ $('[data-login-id]').each(function() {
   });
 
   function init() {
-    Fliplet.App.Storage.get(_this.pvName).then(function(data) {
-      _this.loginPV = data || {};
+    Fliplet.Security.Storage.init().then(function() {
+      Fliplet.Security.Storage.create(_this.pvName, dataStructure).then(function(data) {
+        _this.loginPV = data || {};
 
-      if (data && _this.loginPV) {
-        if (!Fliplet.Navigator.isOnline && _this.loginPV.auth_token && !Fliplet.Env.get('disableSecurity')) {
-          Fliplet.Navigate.to(_this.data.action);
-          return;
-        }
-
-        validateWeb().then(function() {
-          return validateAppAccess();
-        }).then(function() {
-          if (Fliplet.Env.get('disableSecurity')) {
+        if (data && _this.loginPV) {
+          if (!Fliplet.Navigator.isOnline && _this.loginPV.auth_token && !Fliplet.Env.get('disableSecurity')) {
+            Fliplet.Navigate.to(_this.data.action);
             return;
           }
-          
-          Fliplet.Navigate.to(_this.data.action);
-        }, function() {
+
+          if (_this.loginPV.auth_token === '') {
+            _this.$container.find('.login-loader-holder').fadeOut(100);
+            setTimeout(function() {
+              _this.$container.find('.login-form-holder').fadeIn(300);
+              calculateElHeight($('.state.start'));
+            }, 100);
+            return;
+          }
+
+          validateWeb().then(function() {
+            return validateAppAccess();
+          }).then(function() {
+            if (Fliplet.Env.get('disableSecurity')) {
+              return;
+            }
+            
+            Fliplet.Navigate.to(_this.data.action);
+          }, function() {
+            _this.$container.find('.login-loader-holder').fadeOut(100);
+            setTimeout(function() {
+              _this.$container.find('.login-form-holder').fadeIn(300);
+              calculateElHeight($('.state.start'));
+            }, 100);
+          });
+        } else {
           _this.$container.find('.login-loader-holder').fadeOut(100);
           setTimeout(function() {
             _this.$container.find('.login-form-holder').fadeIn(300);
             calculateElHeight($('.state.start'));
           }, 100);
-        });
-      } else {
-        _this.$container.find('.login-loader-holder').fadeOut(100);
-        setTimeout(function() {
-          _this.$container.find('.login-form-holder').fadeIn(300);
-          calculateElHeight($('.state.start'));
-        }, 100);
-        return;
-      }
+          return;
+        }
+      });
     });
   }
 
