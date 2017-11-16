@@ -268,8 +268,10 @@ $('[data-login-id]').each(function() {
 
     if (Fliplet.Env.get('interact')) {
       setTimeout(function() {
-        $('[data-login-id=' + _this.id + ']').removeClass('hidden').removeClass('hidden');
-      }, 500)
+        _this.$container.removeClass('hidden');
+      }, 500);
+      // Disables password fields in edit mode to avoid password autofill
+      $('input[type="password"]').prop('disabled', true);
     } else {
       init();
     }
@@ -277,15 +279,15 @@ $('[data-login-id]').each(function() {
     Fliplet.Studio.onEvent(function(event) {
       if (event.detail.event === 'reload-widget-instance') {
         setTimeout(function() {
-          $('[data-login-id=' + _this.id + ']').removeClass('hidden').removeClass('hidden');
-        }, 500)
+          _this.$container.removeClass('hidden');
+        }, 500);
       }
     });
     _this.$container.on("fliplet_page_reloaded", function() {
       if (Fliplet.Env.get('interact')) {
         setTimeout(function() {
-          $('[data-login-id=' + _this.id + ']').removeClass('hidden').removeClass('hidden');
-        }, 500)
+          _this.$container.removeClass('hidden');
+        }, 500);
       }
     });
   } else {
