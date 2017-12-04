@@ -266,14 +266,11 @@ $('[data-login-id]').each(function() {
 
   if (Fliplet.Env.get('platform') === 'web') {
 
+    init();
+
     if (Fliplet.Env.get('interact')) {
-      setTimeout(function() {
-        _this.$container.removeClass('hidden');
-      }, 500);
       // Disables password fields in edit mode to avoid password autofill
       $('input[type="password"]').prop('disabled', true);
-    } else {
-      init();
     }
 
     Fliplet.Studio.onEvent(function(event) {
