@@ -161,11 +161,10 @@ $('[data-login-id]').each(function() {
           }
 
           if (_this.loginPV.auth_token === '') {
-            _this.$container.find('.login-loader-holder').fadeOut(100);
-            setTimeout(function() {
+            _this.$container.find('.login-loader-holder').fadeOut(100, function() {
               _this.$container.find('.login-form-holder').fadeIn(300);
               calculateElHeight($('.state.start'));
-            }, 100);
+            });
             return;
           }
 
@@ -178,18 +177,16 @@ $('[data-login-id]').each(function() {
             
             Fliplet.Navigate.to(_this.data.action);
           }, function() {
-            _this.$container.find('.login-loader-holder').fadeOut(100);
-            setTimeout(function() {
+            _this.$container.find('.login-loader-holder').fadeOut(100, function(){
               _this.$container.find('.login-form-holder').fadeIn(300);
               calculateElHeight($('.state.start'));
-            }, 100);
+            });
           });
         } else {
-          _this.$container.find('.login-loader-holder').fadeOut(100);
-          setTimeout(function() {
+          _this.$container.find('.login-loader-holder').fadeOut(100, function(){
             _this.$container.find('.login-form-holder').fadeIn(300);
             calculateElHeight($('.state.start'));
-          }, 100);
+          });
           return;
         }
       });
