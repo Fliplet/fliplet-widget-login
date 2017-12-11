@@ -149,57 +149,54 @@ $('[data-login-id]').each(function() {
     });
   });
 
-  function init() {
-    Fliplet.Security.Storage.init().then(function() {
-      Fliplet.Security.Storage.create(_this.pvName, dataStructure).then(function(data) {
+  function showStart(){
+    setTimeout(function(){
+      $('[data-login-id="'+_this.id+'"] .login-loader-holder').fadeOut(100, function() {
+        $('[data-login-id="'+_this.id+'"] .login-form-holder').fadeIn(300);
+        calculateElHeight($('.state.start'));
+      });
+    }, 100);
+  }
+  
+  function init() {    
+    Fliplet.Security.Storage.init()
+      .then(function(){
+        return Fliplet.Security.Storage.create(_this.pvName, dataStructure)
+      })
+      .then(function(data){
         _this.loginPV = data || {};
 
-        if (data && _this.loginPV) {
-          if (!Fliplet.Navigator.isOnline && _this.loginPV.auth_token && !Fliplet.Env.get('disableSecurity')) {
-            Fliplet.Navigate.to(_this.data.action);
-            return;
-          }
+        if (!data || !_this.loginPV) {
+          showStart();
+          return;
+        }
 
-          if (_this.loginPV.auth_token === '') {
-            _this.$container.find('.login-loader-holder').fadeOut(100, function() {
-              _this.$container.find('.login-form-holder').show().css('opacity', 0);
-              calculateElHeight($('.state.start'));
-              setTimeout(function (){
-                _this.$container.find('.login-form-holder').fadeTo(300, 1);
-              }, 0);
-            });
-            return;
-          }
+        if (!Fliplet.Navigator.isOnline
+          && _this.loginPV.auth_token
+          && !Fliplet.Env.get('disableSecurity')) {
+          Fliplet.Navigate.to(_this.data.action);
+          return;
+        }
 
-          validateWeb().then(function() {
+        if (_this.loginPV.auth_token === '') {
+          showStart();
+          return;
+        }
+
+        validateWeb()
+          .then(function() {
             return validateAppAccess();
-          }).then(function() {
+          })
+          .then(function() {
             if (Fliplet.Env.get('disableSecurity')) {
               return;
             }
             
             Fliplet.Navigate.to(_this.data.action);
           }, function() {
-            _this.$container.find('.login-loader-holder').fadeOut(100, function(){
-              _this.$container.find('.login-form-holder').show().css('opacity', 0);
-              calculateElHeight($('.state.start'));
-              setTimeout(function (){
-                _this.$container.find('.login-form-holder').fadeTo(300, 1);
-              }, 0);
-            });
+            showStart();
           });
-        } else {
-          _this.$container.find('.login-loader-holder').fadeOut(100, function(){
-            _this.$container.find('.login-form-holder').show().css('opacity', 0);
-            calculateElHeight($('.state.start'));
-            setTimeout(function (){
-              _this.$container.find('.login-form-holder').fadeTo(300, 1);
-            }, 0);
-          });
-          return;
-        }
       });
-    });
   }
 
   function validateAppAccess() {
