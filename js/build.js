@@ -157,8 +157,8 @@ $('[data-login-id]').each(function() {
       });
     }, 100);
   }
-  
-  function init() {    
+
+  function init() {
     Fliplet.Security.Storage.init()
       .then(function(){
         return Fliplet.Security.Storage.create(_this.pvName, dataStructure)
@@ -171,7 +171,7 @@ $('[data-login-id]').each(function() {
           return;
         }
 
-        if (!Fliplet.Navigator.isOnline
+        if (!Fliplet.Navigator.isOnline()
           && _this.loginPV.auth_token
           && !Fliplet.Env.get('disableSecurity')) {
           Fliplet.Navigate.to(_this.data.action);
@@ -189,9 +189,11 @@ $('[data-login-id]').each(function() {
           })
           .then(function() {
             if (Fliplet.Env.get('disableSecurity')) {
+              console.warn('Fliplet Login component tried to navigate to a page, but security is disabled.');
+              showStart();
               return;
             }
-            
+
             Fliplet.Navigate.to(_this.data.action);
           }, function() {
             showStart();
