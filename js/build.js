@@ -149,51 +149,56 @@ $('[data-login-id]').each(function() {
     });
   });
 
+  function showStart(){
+    setTimeout(function(){
+      $('[data-login-id="'+_this.id+'"] .login-loader-holder').fadeOut(100, function() {
+        $('[data-login-id="'+_this.id+'"] .login-form-holder').fadeIn(300);
+        calculateElHeight($('.state.start'));
+      });
+    }, 100);
+  }
+
   function init() {
-    Fliplet.Security.Storage.init().then(function() {
-      Fliplet.Security.Storage.create(_this.pvName, dataStructure).then(function(data) {
+    Fliplet.Security.Storage.init()
+      .then(function(){
+        return Fliplet.Security.Storage.create(_this.pvName, dataStructure)
+      })
+      .then(function(data){
         _this.loginPV = data || {};
 
-        if (data && _this.loginPV) {
-          if (!Fliplet.Navigator.isOnline && _this.loginPV.auth_token && !Fliplet.Env.get('disableSecurity')) {
-            Fliplet.Navigate.to(_this.data.action);
-            return;
-          }
-
-          if (_this.loginPV.auth_token === '') {
-            _this.$container.find('.login-loader-holder').fadeOut(100);
-            setTimeout(function() {
-              _this.$container.find('.login-form-holder').fadeIn(300);
-              calculateElHeight($('.state.start'));
-            }, 100);
-            return;
-          }
-
-          validateWeb().then(function() {
-            return validateAppAccess();
-          }).then(function() {
-            if (Fliplet.Env.get('disableSecurity')) {
-              return;
-            }
-            
-            Fliplet.Navigate.to(_this.data.action);
-          }, function() {
-            _this.$container.find('.login-loader-holder').fadeOut(100);
-            setTimeout(function() {
-              _this.$container.find('.login-form-holder').fadeIn(300);
-              calculateElHeight($('.state.start'));
-            }, 100);
-          });
-        } else {
-          _this.$container.find('.login-loader-holder').fadeOut(100);
-          setTimeout(function() {
-            _this.$container.find('.login-form-holder').fadeIn(300);
-            calculateElHeight($('.state.start'));
-          }, 100);
+        if (!data || !_this.loginPV) {
+          showStart();
           return;
         }
+
+        if (!Fliplet.Navigator.isOnline()
+          && _this.loginPV.auth_token
+          && !Fliplet.Env.get('disableSecurity')) {
+          Fliplet.Navigate.to(_this.data.action);
+          return;
+        }
+
+        if (_this.loginPV.auth_token === '') {
+          showStart();
+          return;
+        }
+
+        validateWeb()
+          .then(function() {
+            return validateAppAccess();
+          })
+          .then(function() {
+            if (Fliplet.Env.get('disableSecurity')) {
+              console.warn('Fliplet Login component tried to navigate to a page, but security is disabled.');
+              showStart();
+              return;
+            }
+
+            Fliplet.Navigate.to(_this.data.action);
+          }, function() {
+            showStart();
+          });
       });
-    });
   }
 
   function validateAppAccess() {
@@ -266,26 +271,25 @@ $('[data-login-id]').each(function() {
 
   if (Fliplet.Env.get('platform') === 'web') {
 
+    init();
+
     if (Fliplet.Env.get('interact')) {
-      setTimeout(function() {
-        $('[data-login-id=' + _this.id + ']').removeClass('hidden').removeClass('hidden');
-      }, 500)
-    } else {
-      init();
+      // Disables password fields in edit mode to avoid password autofill
+      $('input[type="password"]').prop('disabled', true);
     }
 
     Fliplet.Studio.onEvent(function(event) {
       if (event.detail.event === 'reload-widget-instance') {
         setTimeout(function() {
-          $('[data-login-id=' + _this.id + ']').removeClass('hidden').removeClass('hidden');
-        }, 500)
+          _this.$container.removeClass('hidden');
+        }, 500);
       }
     });
     _this.$container.on("fliplet_page_reloaded", function() {
       if (Fliplet.Env.get('interact')) {
         setTimeout(function() {
-          $('[data-login-id=' + _this.id + ']').removeClass('hidden').removeClass('hidden');
-        }, 500)
+          _this.$container.removeClass('hidden');
+        }, 500);
       }
     });
   } else {
