@@ -95,7 +95,11 @@ $('[data-login-id]').each(function() {
   $('.two-factor-resend').on('click', function() {
     $('.help-two-factor').addClass('hidden');
     calculateElHeight($('.state[data-state=two-factor-code]'));
-    return login(loginOptions).catch(function(err) {
+    return Fliplet.Session.run({
+      method: 'POST',
+      url: 'v1/auth/login',
+      data: loginOptions
+    }).catch(function(err) {
       if (err.status === TWO_FACTOR_ERROR_CODE) {
         $('.two-factor-sent').removeClass('hidden');
         calculateElHeight($('.state[data-state=two-factor-code]'));
@@ -116,7 +120,11 @@ $('[data-login-id]').each(function() {
     }
     $('.help-two-factor').addClass('hidden');
     loginOptions.twofactor = twoFactorCode;
-    login(loginOptions).then(function(userData) {
+    Fliplet.API.request({
+      method: 'POST',
+      url: 'v1/auth/login',
+      data: loginOptions
+    }).then(function(userData) {
       _this.loginPV.userRoleId = userData.userRoleId;
       _this.loginPV.auth_token = userData.auth_token;
       _this.loginPV.email = userData.email;
