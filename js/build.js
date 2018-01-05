@@ -183,14 +183,6 @@ $('[data-login-id]').each(function() {
       });
   }
 
-  function validateAppAccess() {
-    return request({
-      'method': 'GET',
-      'url': 'v1/apps/' + Fliplet.Env.get('appId'),
-      'token': _this.loginPV.auth_token
-    });
-  }
-
   function validateWeb() {
     //validate token
     return request({
