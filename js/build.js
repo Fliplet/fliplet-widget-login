@@ -164,9 +164,6 @@ $('[data-login-id]').each(function() {
           
           validateWeb()
             .then(function() {
-              return validateAppAccess();
-            })
-            .then(function() {
               if (Fliplet.Env.get('disableSecurity')) {
                 console.warn('Fliplet Login component tried to navigate to a page, but security is disabled.');
                 showStart();
