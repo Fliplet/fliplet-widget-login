@@ -193,19 +193,6 @@ $('[data-login-id]').each(function() {
       });
   }
 
-  function validateAppAccess() {
-    return getApps().then(function(apps) {
-      if (_.find(apps, function(app) {
-          return app.id === Fliplet.Env.get('appId') || app.productionAppId === Fliplet.Env.get('appId');
-        })) {
-        return Promise.resolve();
-      }
-      return Promise.reject();
-    });
-
-  }
-
-
   function validateWeb() {
     //validate token
     return request({
@@ -231,24 +218,6 @@ $('[data-login-id]').each(function() {
       data.headers['Auth-token'] = data.token;
       return $.ajax(data);
     });
-  }
-
-  function getApps() {
-    var apps = [];
-
-    if (Fliplet.Env.get('platform') === 'web') {
-      return request({
-        'method': 'GET',
-        'url': 'v1/apps',
-        'token': _this.loginPV.auth_token
-      }).then(function(response) {
-        return Promise.resolve(response.apps);
-      }, function(error) {
-        return Promise.reject(error);
-      });
-    } else {
-      return Fliplet.Apps.get();
-    }
   }
 
   function scheduleCheck() {
