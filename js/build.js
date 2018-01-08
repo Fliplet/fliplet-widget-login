@@ -95,11 +95,7 @@ $('[data-login-id]').each(function() {
   $('.two-factor-resend').on('click', function() {
     $('.help-two-factor').addClass('hidden');
     calculateElHeight($('.state[data-state=two-factor-code]'));
-    return Fliplet.Session.run({
-      method: 'POST',
-      url: 'v1/auth/login',
-      data: loginOptions
-    }).catch(function(err) {
+    return login(loginOptions).catch(function(err) {
       if (err.status === TWO_FACTOR_ERROR_CODE) {
         $('.two-factor-sent').removeClass('hidden');
         calculateElHeight($('.state[data-state=two-factor-code]'));
@@ -120,11 +116,7 @@ $('[data-login-id]').each(function() {
     }
     $('.help-two-factor').addClass('hidden');
     loginOptions.twofactor = twoFactorCode;
-    Fliplet.API.request({
-      method: 'POST',
-      url: 'v1/auth/login',
-      data: loginOptions
-    }).then(function(userData) {
+    login(loginOptions).then(function(userData) {
       _this.loginPV.userRoleId = userData.userRoleId;
       _this.loginPV.auth_token = userData.auth_token;
       _this.loginPV.email = userData.email;
@@ -143,7 +135,7 @@ $('[data-login-id]').each(function() {
       }
 
       Fliplet.Navigate.to(_this.data.action);
-    }).catch(function() {
+    }).catch(function(error) {
       $('.two-factor-not-valid').removeClass('hidden');
       calculateElHeight($('.state[data-state=two-factor-code]'));
     });
@@ -159,60 +151,34 @@ $('[data-login-id]').each(function() {
   }
 
   function init() {
-    Fliplet.Security.Storage.init()
-      .then(function(){
-        return Fliplet.Security.Storage.create(_this.pvName, dataStructure)
-      })
-      .then(function(data){
-        _this.loginPV = data || {};
+    _this.loginPV = {};
+    Fliplet.User.getCachedSession()
+      .then(function(session) {
+        if (session && session.accounts && session.accounts.flipletLogin) {
+          _this.loginPV = session.accounts.flipletLogin[0];
 
-        if (!data || !_this.loginPV) {
-          showStart();
-          return;
-        }
-
-        if (!Fliplet.Navigator.isOnline()
-          && _this.loginPV.auth_token
-          && !Fliplet.Env.get('disableSecurity')) {
-          Fliplet.Navigate.to(_this.data.action);
-          return;
-        }
-
-        if (_this.loginPV.auth_token === '') {
-          showStart();
-          return;
-        }
-
-        validateWeb()
-          .then(function() {
-            return validateAppAccess();
-          })
-          .then(function() {
-            if (Fliplet.Env.get('disableSecurity')) {
-              console.warn('Fliplet Login component tried to navigate to a page, but security is disabled.');
-              showStart();
-              return;
-            }
-
+          if (!Fliplet.Navigator.isOnline() && !Fliplet.Env.get("disableSecurity")) {
             Fliplet.Navigate.to(_this.data.action);
-          }, function() {
-            showStart();
-          });
+            return;
+          }
+          
+          validateWeb()
+            .then(function() {
+              if (Fliplet.Env.get('disableSecurity')) {
+                console.warn('Fliplet Login component tried to navigate to a page, but security is disabled.');
+                showStart();
+                return;
+              }
+
+              Fliplet.Navigate.to(_this.data.action);
+            }, function() {
+              showStart();
+            });
+        }
+
+        showStart();
       });
   }
-
-  function validateAppAccess() {
-    return getApps().then(function(apps) {
-      if (_.find(apps, function(app) {
-          return app.id === Fliplet.Env.get('appId') || app.productionAppId === Fliplet.Env.get('appId');
-        })) {
-        return Promise.resolve();
-      }
-      return Promise.reject();
-    });
-
-  }
-
 
   function validateWeb() {
     //validate token
@@ -239,24 +205,6 @@ $('[data-login-id]').each(function() {
       data.headers['Auth-token'] = data.token;
       return $.ajax(data);
     });
-  }
-
-  function getApps() {
-    var apps = [];
-
-    if (Fliplet.Env.get('platform') === 'web') {
-      return request({
-        'method': 'GET',
-        'url': 'v1/apps',
-        'token': _this.loginPV.auth_token
-      }).then(function(response) {
-        return Promise.resolve(response.apps);
-      }, function(error) {
-        return Promise.reject(error);
-      });
-    } else {
-      return Fliplet.Apps.get();
-    }
   }
 
   function scheduleCheck() {
