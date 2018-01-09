@@ -36,13 +36,44 @@ input.form-control:focus {
 	text-align: center;
 }
 
-.btn-login {
-	min-width: 45%;
+.btn-fliplet-login {
+  display: block;
+  clear: both;
+  width: 100%;
+  min-width: 45%;
+  padding: 10px 16px;
+  font-size: 18px;
+  line-height: 24px;
+  border: none;
+  text-align: center;
+  cursor: pointer;
+  border-radius: 6px;
 }
 
-.login-offline .btn-login {
+.btn-fliplet-login:focus,
+.btn-fliplet-login:hover,
+.btn:active:focus {
+  outline: none;
+}
+
+@media (min-width:640px) {
+	.btn-fliplet-login {
+		clear: none;
+		display: inline-block;
+		width: auto;
+		max-width: 100%;
+	}
+}
+
+.login-offline .btn-fliplet-login {
 	background-color: #d6d6d6;
 	pointer-events: none;
+}
+
+.btn-fliplet.login.disabled,
+.two-factor-resend.disabled {
+  opacity: 0.5;
+  pointer-events: none;
 }
 
 .login-error-holder {

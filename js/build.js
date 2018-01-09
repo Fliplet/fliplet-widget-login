@@ -39,6 +39,8 @@ $('[data-login-id]').each(function() {
   $('.login-form').on('submit', function(e) {
     e.preventDefault();
 
+    _this.$container.find('.btn-login').addClass('disabled');
+    _this.$container.find('.btn-login').html('Logging in...');
     _this.$container.find('.login-error-holder').removeClass('show');
     _this.$container.find('.login-error-holder').html('');
 
@@ -65,11 +67,16 @@ $('[data-login-id]').each(function() {
         });
       });
     }).then(function() {
+      _this.$container.find('.btn-login').removeClass('disabled');
+      _this.$container.find('.btn-login').html('Log in');
+
       if (Fliplet.Env.get('disableSecurity')) {
         return;
       }
       Fliplet.Navigate.to(_this.data.action);
     }).catch(function(err) {
+      _this.$container.find('.btn-login').removeClass('disabled');
+      _this.$container.find('.btn-login').html('Log in');
       if (err && err.status === TWO_FACTOR_ERROR_CODE) {
         if (err.responseJSON.condition !== ONE_TIME_2FA_OPTION) {
           $('.two-factor-resend').removeClass('hidden');
@@ -93,14 +100,22 @@ $('[data-login-id]').each(function() {
   });
 
   $('.two-factor-resend').on('click', function() {
+    var _that = $(this);
     $('.help-two-factor').addClass('hidden');
+    _that.addClass('disabled');
+    _that.html('Sending...');
+
     calculateElHeight($('.state[data-state=two-factor-code]'));
     return login(loginOptions).catch(function(err) {
       if (err.status === TWO_FACTOR_ERROR_CODE) {
+        _that.removeClass('disabled');
+        _that.html('Send new code');
         $('.two-factor-sent').removeClass('hidden');
         calculateElHeight($('.state[data-state=two-factor-code]'));
         return;
       }
+      _that.removeClass('disabled');
+      _that.html('Send new code');
       $('.two-factor-enable-to-resend').removeClass('hidden');
       calculateElHeight($('.state[data-state=two-factor-code]'));
     });
@@ -109,6 +124,9 @@ $('[data-login-id]').each(function() {
   $('.fliplet-two-factor').on('submit', function(e) {
     e.preventDefault();
     var twoFactorCode = $('.two-factor-code').val();
+    _this.$container.find('.two-factor-btn').addClass('disabled');
+    _this.$container.find('.two-factor-btn').html('Authenticating...');
+
     if (twoFactorCode === '') {
       $('.two-factor-not-valid').removeClass('hidden');
       calculateElHeight($('.state[data-state=two-factor-code]'));
@@ -130,12 +148,17 @@ $('[data-login-id]').each(function() {
         });
       });
     }).then(function() {
+      _this.$container.find('.two-factor-btn').removeClass('disabled');
+      _this.$container.find('.two-factor-btn').html('Authenticate');
+
       if (Fliplet.Env.get('disableSecurity')) {
         return;
       }
 
       Fliplet.Navigate.to(_this.data.action);
     }).catch(function(error) {
+      _this.$container.find('.two-factor-btn').removeClass('disabled');
+      _this.$container.find('.two-factor-btn').html('Authenticate');
       $('.two-factor-not-valid').removeClass('hidden');
       calculateElHeight($('.state[data-state=two-factor-code]'));
     });
