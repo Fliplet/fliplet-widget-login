@@ -3,12 +3,14 @@ $('[data-login-id]').each(function() {
   var TWO_FACTOR_ERROR_CODE = 428;
   var ONE_TIME_2FA_OPTION = 'onetime';
   var genericErrorMessage = '<p>Unfortunately you don\'t have access to the app.</p><p>Please contact the app Admin for more information.</p>';
-  var LOGIN_DEFAULT = 'Log in';
-  var LOGIN_PROCESSING = 'Logging in...';
-  var AUTH_DEFAULT = 'Authenticate';
-  var AUTH_PROCESSING = 'Authenticating...';
-  var SEND_DEFAULT = 'Send new code';
-  var SEND_PROCESSING = 'Sending...';
+  var LABELS = {
+    loginDefault: 'Log in';
+    loginProcessing: 'Logging in...';
+    authDefault: 'Authenticate';
+    authProcessing: 'Authenticating...';
+    sendDefault: 'Send new code';
+    sendProcessing: 'Sending...';
+  }
   _this.$container = $(this);
   _this.id = _this.$container.attr('data-login-id');
   _this.data = Fliplet.Widget.getData(_this.id);
@@ -46,7 +48,7 @@ $('[data-login-id]').each(function() {
     e.preventDefault();
 
     _this.$container.find('.btn-login').addClass('disabled');
-    _this.$container.find('.btn-login').html(LOGIN_PROCESSING);
+    _this.$container.find('.btn-login').html(LABELS.loginProcessing);
     _this.$container.find('.login-error-holder').removeClass('show');
     _this.$container.find('.login-error-holder').html('');
 
@@ -74,7 +76,7 @@ $('[data-login-id]').each(function() {
       });
     }).then(function() {
       _this.$container.find('.btn-login').removeClass('disabled');
-      _this.$container.find('.btn-login').html(LOGIN_DEFAULT);
+      _this.$container.find('.btn-login').html(LABELS.loginDefault);
 
       if (Fliplet.Env.get('disableSecurity')) {
         return;
@@ -82,7 +84,7 @@ $('[data-login-id]').each(function() {
       Fliplet.Navigate.to(_this.data.action);
     }).catch(function(err) {
       _this.$container.find('.btn-login').removeClass('disabled');
-      _this.$container.find('.btn-login').html(LOGIN_DEFAULT);
+      _this.$container.find('.btn-login').html(LABELS.loginDefault);
       if (err && err.status === TWO_FACTOR_ERROR_CODE) {
         if (err.responseJSON.condition !== ONE_TIME_2FA_OPTION) {
           $('.two-factor-resend').removeClass('hidden');
@@ -109,19 +111,19 @@ $('[data-login-id]').each(function() {
     var _that = $(this);
     $('.help-two-factor').addClass('hidden');
     _that.addClass('disabled');
-    _that.html(SEND_PROCESSING);
+    _that.html(LABELS.sendProcessing);
 
     calculateElHeight($('.state[data-state=two-factor-code]'));
     return login(loginOptions).catch(function(err) {
       if (err.status === TWO_FACTOR_ERROR_CODE) {
         _that.removeClass('disabled');
-        _that.html(SEND_DEFAULT);
+        _that.html(LABELS.sendDefault);
         $('.two-factor-sent').removeClass('hidden');
         calculateElHeight($('.state[data-state=two-factor-code]'));
         return;
       }
       _that.removeClass('disabled');
-      _that.html(SEND_DEFAULT);
+      _that.html(LABELS.sendDefault);
       $('.two-factor-enable-to-resend').removeClass('hidden');
       calculateElHeight($('.state[data-state=two-factor-code]'));
     });
@@ -131,7 +133,7 @@ $('[data-login-id]').each(function() {
     e.preventDefault();
     var twoFactorCode = $('.two-factor-code').val();
     _this.$container.find('.two-factor-btn').addClass('disabled');
-    _this.$container.find('.two-factor-btn').html(AUTH_PROCESSING);
+    _this.$container.find('.two-factor-btn').html(LABELS.authProcessing);
 
     if (twoFactorCode === '') {
       $('.two-factor-not-valid').removeClass('hidden');
@@ -155,7 +157,7 @@ $('[data-login-id]').each(function() {
       });
     }).then(function() {
       _this.$container.find('.two-factor-btn').removeClass('disabled');
-      _this.$container.find('.two-factor-btn').html(AUTH_DEFAULT);
+      _this.$container.find('.two-factor-btn').html(LABELS.authDefault);
 
       if (Fliplet.Env.get('disableSecurity')) {
         return;
@@ -164,7 +166,7 @@ $('[data-login-id]').each(function() {
       Fliplet.Navigate.to(_this.data.action);
     }).catch(function(error) {
       _this.$container.find('.two-factor-btn').removeClass('disabled');
-      _this.$container.find('.two-factor-btn').html(AUTH_DEFAULT);
+      _this.$container.find('.two-factor-btn').html(LABELS.authDefault);
       $('.two-factor-not-valid').removeClass('hidden');
       calculateElHeight($('.state[data-state=two-factor-code]'));
     });
