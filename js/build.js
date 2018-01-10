@@ -4,13 +4,13 @@ $('[data-login-id]').each(function() {
   var ONE_TIME_2FA_OPTION = 'onetime';
   var genericErrorMessage = '<p>Unfortunately you don\'t have access to the app.</p><p>Please contact the app Admin for more information.</p>';
   var LABELS = {
-    loginDefault: 'Log in';
-    loginProcessing: 'Logging in...';
-    authDefault: 'Authenticate';
-    authProcessing: 'Authenticating...';
-    sendDefault: 'Send new code';
-    sendProcessing: 'Sending...';
-  }
+    loginDefault: 'Log in',
+    loginProcessing: 'Logging in...',
+    authDefault: 'Authenticate',
+    authProcessing: 'Authenticating...',
+    sendDefault: 'Send new code',
+    sendProcessing: 'Sending...'
+  };
   _this.$container = $(this);
   _this.id = _this.$container.attr('data-login-id');
   _this.data = Fliplet.Widget.getData(_this.id);
