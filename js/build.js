@@ -181,8 +181,7 @@ $('[data-login-id]').each(function() {
     // Because sub apps will use the token from the session passport but the 
     // Main app should continue using the token the app was wrapped with
     Fliplet.App.Storage.set('sharedSession', false)
-    . then(function() {
-      debugger;
+      .then(function() {
       Fliplet.User.getCachedSession()
         .then(function(session) {
           if (session && session.server && session.server.passports && session.server.passports.flipletLogin) {
