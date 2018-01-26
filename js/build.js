@@ -38,6 +38,22 @@ $('[data-login-id]').each(function() {
     el.css('overflow', 'auto');
   }
 
+  $('.forgot-password').on('click', function() {
+    var url;
+    switch(Fliplet.Env.get('environment')) {
+      case 'local': 
+        url = 'http://studio.fliplet.local:8080/forgot-password';
+        break;
+      case 'staging':
+        url = 'https://staging2.studio.fliplet.com/forgot-password';
+        break;
+      default:
+        url = 'https://production.studio.fliplet.com/forgot-password';
+    }
+
+    Fliplet.Navigate.url(url);
+  });
+
   $('.login-form').on('submit', function(e) {
     e.preventDefault();
 
