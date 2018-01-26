@@ -81,14 +81,10 @@ $('[data-login-id]').each(function() {
       _this.loginPV.auth_token = response.auth_token;
       _this.loginPV.email = response.email;
 
-      return Fliplet.Security.Storage.update().then(function() {
-        return Fliplet.App.Storage.set(_this.pvNameStorage, {
-          userRoleId: response.userRoleId,
-          auth_token: response.auth_token,
-          email: response.email
-        }).then(function() {
-          return validateAppAccess();
-        });
+      return Fliplet.App.Storage.set(_this.pvNameStorage, {
+        userRoleId: response.userRoleId,
+        auth_token: response.auth_token,
+        email: response.email
       });
     }).then(function() {
       _this.$container.find('.btn-login').removeClass('disabled');
@@ -162,14 +158,11 @@ $('[data-login-id]').each(function() {
       _this.loginPV.userRoleId = userData.userRoleId;
       _this.loginPV.auth_token = userData.auth_token;
       _this.loginPV.email = userData.email;
-      return Fliplet.Security.Storage.update().then(function() {
-        return Fliplet.App.Storage.set(_this.pvNameStorage, {
-          auth_token: userData.auth_token,
-          userRoleId: userData.userRoleId,
-          email: userData.email
-        }).then(function() {
-          return validateAppAccess();
-        });
+      
+      return Fliplet.App.Storage.set(_this.pvNameStorage, {
+        auth_token: userData.auth_token,
+        userRoleId: userData.userRoleId,
+        email: userData.email
       });
     }).then(function() {
       _this.$container.find('.two-factor-btn').removeClass('disabled');
@@ -199,32 +192,39 @@ $('[data-login-id]').each(function() {
 
   function init() {
     _this.loginPV = {};
-    Fliplet.User.getCachedSession()
-      .then(function(session) {
-        if (session && session.accounts && session.accounts.flipletLogin) {
-          _this.loginPV = session.accounts.flipletLogin[0];
 
-          if (!Fliplet.Navigator.isOnline() && !Fliplet.Env.get("disableSecurity")) {
-            Fliplet.Navigate.to(_this.data.action);
-            return;
-          }
-          
-          validateWeb()
-            .then(function() {
-              if (Fliplet.Env.get('disableSecurity')) {
-                console.warn('Fliplet Login component tried to navigate to a page, but security is disabled.');
-                showStart();
-                return;
-              }
-
+    // Using Fliplet Login with App list then session is not meant to be shared
+    // Because sub apps will use the token from the session passport but the 
+    // Main app should continue using the token the app was wrapped with
+    Fliplet.App.Storage.set('sharedSession', false)
+      .then(function() {
+      Fliplet.User.getCachedSession()
+        .then(function(session) {
+          if (session && session.server && session.server.passports && session.server.passports.flipletLogin) {
+            _this.loginPV = session.server.passports.flipletLogin[0];
+  
+            if (!Fliplet.Navigator.isOnline() && !Fliplet.Env.get("disableSecurity")) {
               Fliplet.Navigate.to(_this.data.action);
-            }, function() {
-              showStart();
-            });
-        }
-
-        showStart();
-      });
+              return;
+            }
+            
+            validateWeb()
+              .then(function() {
+                if (Fliplet.Env.get('disableSecurity')) {
+                  console.warn('Fliplet Login component tried to navigate to a page, but security is disabled.');
+                  showStart();
+                  return;
+                }
+  
+                Fliplet.Navigate.to(_this.data.action);
+              }, function() {
+                showStart();
+              });
+          }
+  
+          showStart();
+        });
+    });
   }
 
   function validateWeb() {
