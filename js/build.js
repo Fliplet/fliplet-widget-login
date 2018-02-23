@@ -117,7 +117,7 @@ $('[data-login-id]').each(function() {
   $('.fliplet-forgot-password').on('submit', function(e) {
     e.preventDefault();
     $('.forgot-verify-error').addClass('hidden');
-    var email = $('.forgot-email-address').val();
+    email = $('.forgot-email-address').val();
 
     return Fliplet.API.request({
       method: 'POST',
@@ -132,7 +132,7 @@ $('[data-login-id]').each(function() {
     });
   });
 
-  $('.fliplet-verify-code').on('submit', function() {
+  $('.fliplet-verify-code').on('submit', function(e) {
     e.preventDefault();
     userEnteredCode = $('[name="forgot-verification-code"]').val();
 
@@ -141,7 +141,7 @@ $('[data-login-id]').each(function() {
     calculateElHeight($('.state.present'));
   });
 
-  $('.fliplet-new-password').on('submit', function() {
+  $('.fliplet-new-password').on('submit', function(e) {
     e.preventDefault();
     $('.forgot-new-password-error').addClass('hidden');
 
@@ -223,8 +223,6 @@ $('[data-login-id]').each(function() {
           auth_token: userData.auth_token,
           userRoleId: userData.userRoleId,
           email: userData.email
-        }).then(function() {
-          return validateAppAccess();
         });
       });
     }).then(function() {
