@@ -106,10 +106,6 @@ $('[data-login-id]').each(function() {
     $('.state.present').removeClass('present').addClass('past');
     $('[data-state="forgot-email"]').removeClass('future').addClass('present');
     calculateElHeight($('.state.present'));
-
-    // @TODO: NOT SURE IF SOMETHING ELSE IS NEEDED HERE
-    // THIS IS THE BUTTON OF THE FORGOT PASSWORD ON THE INITIAL STATE
-    // SHOWS THE EMAIL FIELD FOR VERIFICATION
   });
 
   $('.btn-forgot-back').on('click', function() {
@@ -121,19 +117,23 @@ $('[data-login-id]').each(function() {
   $('.fliplet-forgot-password').on('submit', function() {
     e.preventDefault();
     $('.forgot-verify-error').addClass('hidden');
+    var email = $('.forgot-email-address').val();
 
-    // @TODO: SEND VERIFICATION CODE AND THEN DO WHAT IS BELOW
-
-    $('.state.present').removeClass('present').addClass('past');
-    $('[data-state="forgot-code"]').removeClass('future').addClass('present');
-    calculateElHeight($('.state.present'));
+    return Fliplet.API.request({
+      method: 'POST',
+      url: '/v1/auth/forgot',
+      data: {
+        email: email
+      }
+    }).then(function onRecoverPassCodeSent() {
+      $('.state.present').removeClass('present').addClass('past');
+      $('[data-state="forgot-code"]').removeClass('future').addClass('present');
+      calculateElHeight($('.state.present'));
+    });
   });
 
   $('.fliplet-verify-code').on('submit', function() {
     e.preventDefault();
-    
-    // @TODO: SEND VERIFICATION CODE AND THEN DO WHAT IS BELOW
-
     userEnteredCode = $('[name="forgot-verification-code"]').val();
 
     $('.state.present').removeClass('present').addClass('past');
@@ -153,19 +153,24 @@ $('[data-login-id]').each(function() {
       $('.forgot-new-password-error').removeClass('hidden');
       calculateElHeight($('.state.present'));
     }
-    
-    // @TODO: RESET THE PASSWORD
 
-    // @TODO: IF SUCCESS USE THIS
-    $('.state.present').removeClass('present').addClass('past');
-    $('[data-state="auth"]').removeClass('past').addClass('future').removeClass('future').addClass('present');
-    calculateElHeight($('.state.present'));
-
-    // @TODO: IN ERROR USE THIS
-    $('.state.present').removeClass('present').addClass('future');
-    $('[data-state="forgot-code"]').removeClass('past').addClass('present');
-    $('.forgot-verify-error').removeClass('hidden');
-    calculateElHeight($('.state.present'));
+    return Fliplet.API.request({
+      method: 'POST',
+      url: '/v1/auth/reset/' + userEnteredCode,
+      data: {
+        email: email,
+        password: password
+      }
+    }).then(function() {
+      $('.state.present').removeClass('present').addClass('past');
+      $('[data-state="auth"]').removeClass('past').addClass('future').removeClass('future').addClass('present');
+      calculateElHeight($('.state.present'));
+    }).catch(function() {
+      $('.state.present').removeClass('present').addClass('future');
+      $('[data-state="forgot-code"]').removeClass('past').addClass('present');
+      $('.forgot-verify-error').removeClass('hidden');
+      calculateElHeight($('.state.present'));
+    });
   });
 
   $('span.back').on('click', function() {
@@ -259,7 +264,7 @@ $('[data-login-id]').each(function() {
             Fliplet.Navigate.to(_this.data.action);
             return;
           }
-          
+
           validateWeb()
             .then(function() {
               if (Fliplet.Env.get('disableSecurity')) {
