@@ -32,6 +32,10 @@ input.form-control:focus {
 	box-shadow: none;
 }
 
+.fliplet-new-password .form-control + .form-control {
+	margin-top: 10px;
+}
+
 .login-button-holder {
 	text-align: center;
 }
