@@ -114,14 +114,14 @@ $('[data-login-id]').each(function() {
     calculateElHeight($('.state.present'));
   });
 
-  $('.fliplet-forgot-password').on('submit', function() {
+  $('.fliplet-forgot-password').on('submit', function(e) {
     e.preventDefault();
     $('.forgot-verify-error').addClass('hidden');
     var email = $('.forgot-email-address').val();
 
     return Fliplet.API.request({
       method: 'POST',
-      url: '/v1/auth/forgot',
+      url: '/v1/auth/forgot?method=code',
       data: {
         email: email
       }
