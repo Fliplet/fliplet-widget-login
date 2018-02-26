@@ -144,6 +144,7 @@ $('[data-login-id]').each(function() {
   $('.fliplet-new-password').on('submit', function(e) {
     e.preventDefault();
     $('.forgot-new-password-error').addClass('hidden');
+    $('.btn-reset-pass').html('Resetting...').addClass('disabled');
 
     // Checks if passwords match
     var password = $('.forgot-new-password').val();
@@ -151,7 +152,9 @@ $('[data-login-id]').each(function() {
 
     if (password !== confirmation) {
       $('.forgot-new-password-error').removeClass('hidden');
+      $('.btn-reset-pass').html('Reset password').removeClass('disabled');
       calculateElHeight($('.state.present'));
+      return;
     }
 
     return Fliplet.API.request({
@@ -163,14 +166,22 @@ $('[data-login-id]').each(function() {
       }
     }).then(function() {
       $('.state.present').removeClass('present').addClass('past');
-      $('[data-state="auth"]').removeClass('past').addClass('future').removeClass('future').addClass('present');
+      $('[data-state="reset-success"]').removeClass('future').addClass('present');
+      $('.btn-reset-pass').html('Reset password').removeClass('disabled');
       calculateElHeight($('.state.present'));
     }).catch(function() {
       $('.state.present').removeClass('present').addClass('future');
       $('[data-state="forgot-code"]').removeClass('past').addClass('present');
       $('.forgot-verify-error').removeClass('hidden');
+      $('.btn-reset-pass').html('Reset password').removeClass('disabled');
       calculateElHeight($('.state.present'));
     });
+  });
+
+  $('.btn-reset-success').on('click', function() {
+    $('.state.present').removeClass('present').addClass('past');
+    $('[data-state="auth"]').removeClass('past').addClass('present');
+    calculateElHeight($('.state.present'));
   });
 
   $('span.back').on('click', function() {
