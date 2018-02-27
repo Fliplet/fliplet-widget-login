@@ -114,6 +114,14 @@ $('[data-login-id]').each(function() {
     calculateElHeight($('.state.present'));
   });
 
+  $('.btn-forgot-cancel').on('click', function() {
+    $('[data-state="forgot-new-pass"]').removeClass('present past').addClass('future');
+    $('[data-state="forgot-code"]').removeClass('present past').addClass('future');
+    $('[data-state="forgot-email"]').removeClass('past').addClass('future');
+    $('[data-state="auth"]').removeClass('past').addClass('present');
+    calculateElHeight($('.state.present'));
+  });
+
   $('.fliplet-forgot-password').on('submit', function(e) {
     e.preventDefault();
     $('.forgot-verify-error').addClass('hidden');
