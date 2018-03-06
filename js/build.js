@@ -6,8 +6,8 @@ $('[data-login-id]').each(function() {
   var LABELS = {
     loginDefault: 'Log in',
     loginProcessing: 'Logging in...',
-    authDefault: 'Authenticate',
-    authProcessing: 'Authenticating...',
+    authDefault: 'Verify',
+    authProcessing: 'Verifying...',
     sendDefault: 'Send new code',
     sendProcessing: 'Sending...'
   };
