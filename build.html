@@ -75,25 +75,25 @@
     </div>
     <div class="state future" data-state="reset-success">
       <h3 class="aligncenter">Password successfully reset</h3>
-      <p>Your password was successfully reset. Click login to sign in using your new password.</p>
+      <p>Your password was successfully reset. You can now log in using your new password.</p>
       <div class="login-button-holder">
-        <button type="button" class="btn btn-primary btn-reset-success">Login</button>
+        <button type="button" class="btn btn-primary btn-reset-success">Log in</button>
       </div>
     </div>
     <div class="state future" data-state="two-factor-code">
-      <h3 class="aligncenter">Authentication</h3>
-      <p>Your account uses two-factor authentication, so you'll need a verification code to access</p>
+      <h3 class="aligncenter">Two-Factor Authentication</h3>
+      <p>This extra step shows it's really you trying to log in</p>
       <form class="fliplet-two-factor">
         <div class="form-group clearfix ">
-          <label>Enter your authentication code</label>
+          <label>Verification code</label>
           <div class="fl-two-auth">
             <span class="fa fa-chevron-left back"></span>
-            <input type="text" class="form-control two-factor-code" name="two-factor" placeholder="Enter your authentication code" required>
+            <input type="tel" class="form-control two-factor-code" name="two-factor" placeholder="Enter code" required>
           </div>
         </div>
         <p class="help-two-factor two-factor-not-valid text-danger text-center hidden">Please enter a valid code.</p>
         <p class="help-two-factor two-factor-enable-to-resend text-danger text-center hidden">Unable to resend your code, try again later.</p>
-        <p class="help-two-factor two-factor-sent text-success text-center hidden">Two factor code sent.</p>
+        <p class="help-two-factor two-factor-sent text-success text-center hidden">Verification code sent.</p>
         <div class="login-button-holder">
           <button type="submit" class="btn btn-primary btn-fliplet-login two-factor-btn">Authenticate</button>
         </div>
