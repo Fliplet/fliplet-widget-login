@@ -2,7 +2,7 @@ $('[data-login-id]').each(function() {
   var _this = this;
   var TWO_FACTOR_ERROR_CODE = 428;
   var ONE_TIME_2FA_OPTION = 'onetime';
-  var genericErrorMessage = '<p>Unfortunately you don\'t have access to the app.</p><p>Please contact the app Admin for more information.</p>';
+  var genericErrorMessage = '<p>Unable to login. Try again later.</p>';
   var LABELS = {
     loginDefault: 'Log in',
     loginProcessing: 'Logging in...',
@@ -16,13 +16,7 @@ $('[data-login-id]').each(function() {
   _this.data = Fliplet.Widget.getData(_this.id);
   _this.pvNameStorage = 'fliplet_login_component';
   _this.pvName = 'login_component_' + _this.id;
-  var dataStructure = {
-    auth_token: '',
-    id: '',
-    email: '',
-    userRoleId: '',
-    createdAt: null
-  }
+
   var loginOptions;
   var userEnteredCode;
 
@@ -95,7 +89,12 @@ $('[data-login-id]').each(function() {
         calculateElHeight($('.state.present'));
         return;
       }
-      _this.$container.find('.login-error-holder').html(genericErrorMessage);
+      var errorMessage = genericErrorMessage;
+      if (err && err.responseJSON) {
+        errorMessage = err.responseJSON.message;
+      }
+
+      _this.$container.find('.login-error-holder').html(errorMessage);
       _this.$container.find('.login-error-holder').addClass('show');
       calculateElHeight($('.state.present'));
     });
@@ -274,8 +273,8 @@ $('[data-login-id]').each(function() {
     _this.loginPV = {};
     Fliplet.User.getCachedSession()
       .then(function(session) {
-        if (session && session.accounts && session.accounts.flipletLogin) {
-          _this.loginPV = session.accounts.flipletLogin[0];
+        if (session && session.server && session.server.flipletLogin) {
+          _this.loginPV = session.server.flipletLogin[0];
 
           if (!Fliplet.Navigator.isOnline() && !Fliplet.Env.get("disableSecurity")) {
             Fliplet.Navigate.to(_this.data.action);
