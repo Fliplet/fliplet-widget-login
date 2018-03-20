@@ -60,15 +60,14 @@ $('[data-login-id]').each(function() {
       _this.loginPV.auth_token = response.auth_token;
       _this.loginPV.email = response.email;
 
-      return Fliplet.Security.Storage.update().then(function() {
-        return Fliplet.App.Storage.set(_this.pvNameStorage, {
-          userRoleId: response.userRoleId,
-          auth_token: response.auth_token,
-          email: response.email
-        }).then(function() {
-          return validateAppAccess();
-        });
+      return Fliplet.App.Storage.set(_this.pvNameStorage, {
+        userRoleId: response.userRoleId,
+        auth_token: response.auth_token,
+        email: response.email
+      }).then(function() {
+        return validateAppAccess();
       });
+
     }).then(function() {
       _this.$container.find('.btn-login').removeClass('disabled');
       _this.$container.find('.btn-login').html(LABELS.loginDefault);
@@ -236,13 +235,13 @@ $('[data-login-id]').each(function() {
       _this.loginPV.userRoleId = userData.userRoleId;
       _this.loginPV.auth_token = userData.auth_token;
       _this.loginPV.email = userData.email;
-      return Fliplet.Security.Storage.update().then(function() {
-        return Fliplet.App.Storage.set(_this.pvNameStorage, {
-          auth_token: userData.auth_token,
-          userRoleId: userData.userRoleId,
-          email: userData.email
-        });
+
+      return Fliplet.App.Storage.set(_this.pvNameStorage, {
+        auth_token: userData.auth_token,
+        userRoleId: userData.userRoleId,
+        email: userData.email
       });
+
     }).then(function() {
       _this.$container.find('.two-factor-btn').removeClass('disabled');
       _this.$container.find('.two-factor-btn').html(LABELS.authDefault);
