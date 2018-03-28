@@ -64,8 +64,6 @@ $('[data-login-id]').each(function() {
         userRoleId: response.userRoleId,
         auth_token: response.auth_token,
         email: response.email
-      }).then(function() {
-        return validateAppAccess();
       });
 
     }).then(function() {
