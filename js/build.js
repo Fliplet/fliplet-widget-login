@@ -130,6 +130,7 @@ $('[data-login-id]').each(function() {
         email: email
       }
     }).then(function onRecoverPassCodeSent() {
+      $('.forgot-verify-user-email').text(email);
       $('.state.present').removeClass('present').addClass('past');
       $('[data-state="forgot-code"]').removeClass('future').addClass('present');
       calculateElHeight($('.state.present'));
