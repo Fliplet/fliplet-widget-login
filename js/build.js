@@ -39,6 +39,19 @@ $('[data-login-id]').each(function() {
     el.css('overflow', 'auto');
   }
 
+  function createUserProfile(response) {
+    response = response || {};
+    if (!response.id || !response.region) {
+      return;
+    }
+
+    return {
+      type: 'fliplet',
+      id: response.id,
+      region: response.region
+    };
+  }
+
   $('.login-form').on('submit', function(e) {
     e.preventDefault();
 
@@ -60,12 +73,19 @@ $('[data-login-id]').each(function() {
       _this.loginPV.auth_token = response.auth_token;
       _this.loginPV.email = response.email;
 
-      return Fliplet.App.Storage.set(_this.pvNameStorage, {
-        userRoleId: response.userRoleId,
-        auth_token: response.auth_token,
-        email: response.email
-      });
+      var user = createUserProfile(response);
 
+      return Promise.all([
+        Fliplet.App.Storage.set(_this.pvNameStorage, {
+          userRoleId: response.userRoleId,
+          auth_token: response.auth_token,
+          email: response.email
+        }),
+        Fliplet.Profile.set({
+          email: response.email,
+          user: user
+        })
+      ]);
     }).then(function() {
       _this.$container.find('.btn-login').removeClass('disabled');
       _this.$container.find('.btn-login').html(LABELS.loginDefault);
