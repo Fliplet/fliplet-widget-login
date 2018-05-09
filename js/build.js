@@ -288,6 +288,25 @@ $('[data-login-id]').each(function() {
     }, 100);
   }
 
+  function updateUserData(data) {
+    var user = createUserProfile({
+      region: data.region,
+      id: data.id
+    });
+
+    return Promise.all([
+      Fliplet.App.Storage.set(_this.pvNameStorage, {
+        userRoleId: data.userRoleId,
+        auth_token: data.authToken,
+        email: data.email
+      }),
+      Fliplet.Profile.set({
+        email: data.email,
+        user: user
+      })
+    ]);
+  }
+
   function init() {
     _this.loginPV = {};
     Fliplet.User.getCachedSession()
@@ -297,23 +316,30 @@ $('[data-login-id]').each(function() {
         }
 
         // Update stored email address based on retrieved session
-        var email = session.user.email;
-        var user = createUserProfile({
+        return updateUserData({
+          id: session.user.id,
           region: session.auth_token.substr(0, 2),
-          id: session.user.id
+          userRoleId: session.user.userRoleId,
+          authToken: session.auth_token,
+          email: session.user.email
         });
+      })
+      .then(function () {
+        if (!Fliplet.Navigator.isOnline()) {
+          return Promise.resolve();
+        }
 
-        return Promise.all([
-            Fliplet.App.Storage.set(_this.pvNameStorage, {
-              userRoleId: session.user.userRoleId,
-              auth_token: session.auth_token,
-              email: email
-            }),
-            Fliplet.Profile.set({
-              email: email,
-              user: user
-            })
-        ]);
+        return validateWeb()
+          .then(function (response) {
+            // Update stored email address based on retrieved response
+            return updateUserData({
+              id: response.user.id,
+              region: response.region,
+              userRoleId: response.user.userRoleId,
+              authToken: response.user.auth_token,
+              email: response.user.email
+            });
+          });
       })
       .then(function () {
         if (Fliplet.Env.get('disableSecurity')) {
