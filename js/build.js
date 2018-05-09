@@ -42,6 +42,7 @@ $('[data-login-id]').each(function() {
   function createUserProfile(response) {
     response = response || {};
     if (!response.id || !response.region) {
+      console.warn('Could not create user object for Fliplet.Profile');
       return;
     }
 
@@ -291,28 +292,42 @@ $('[data-login-id]').each(function() {
     _this.loginPV = {};
     Fliplet.User.getCachedSession()
       .then(function(session) {
-        if (session && session.server && session.server.flipletLogin) {
-          _this.loginPV = session.server.flipletLogin[0];
-
-          if (!Fliplet.Navigator.isOnline() && !Fliplet.Env.get("disableSecurity")) {
-            Fliplet.Navigate.to(_this.data.action);
-            return;
-          }
-
-          validateWeb()
-            .then(function() {
-              if (Fliplet.Env.get('disableSecurity')) {
-                console.warn('Fliplet Login component tried to navigate to a page, but security is disabled.');
-                showStart();
-                return;
-              }
-
-              Fliplet.Navigate.to(_this.data.action);
-            }, function() {
-              showStart();
-            });
+        if (!session || !session.user) {
+          return Promise.reject('Login session not found');
         }
 
+        // Update stored email address based on retrieved session
+        var email = session.user.email;
+        var user = createUserProfile({
+          region: session.auth_token.substr(0, 2),
+          id: session.user.id
+        });
+
+        return Promise.all([
+            Fliplet.App.Storage.set(_this.pvNameStorage, {
+              userRoleId: session.user.userRoleId,
+              auth_token: session.auth_token,
+              email: email
+            }),
+            Fliplet.Profile.set({
+              email: email,
+              user: user
+            })
+        ]);
+      })
+      .then(function () {
+        if (Fliplet.Env.get('disableSecurity')) {
+          return Promise.reject('Login verified. Navigation is disabled due to security being disabled.');
+        }
+
+        var navigate = Fliplet.Navigate.to(_this.data.action);
+        if (typeof navigate === 'object' && typeof navigate.then === 'function') {
+          return navigate;
+        }
+        return Promise.resolve();
+      })
+      .catch(function (error) {
+        console.warn(error);
         showStart();
       });
   }
