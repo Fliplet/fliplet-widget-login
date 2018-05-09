@@ -76,17 +76,13 @@ $('[data-login-id]').each(function() {
 
       var user = createUserProfile(response);
 
-      return Promise.all([
-        Fliplet.App.Storage.set(_this.pvNameStorage, {
-          userRoleId: response.userRoleId,
-          auth_token: response.auth_token,
-          email: response.email
-        }),
-        Fliplet.Profile.set({
-          email: response.email,
-          user: user
-        })
-      ]);
+      return updateUserData({
+        id: response.id,
+        region: response.region,
+        userRoleId: response.userRoleId,
+        authToken: response.auth_token,
+        email: response.email
+      });
     }).then(function() {
       _this.$container.find('.btn-login').removeClass('disabled');
       _this.$container.find('.btn-login').html(LABELS.loginDefault);
@@ -256,12 +252,13 @@ $('[data-login-id]').each(function() {
       _this.loginPV.auth_token = userData.auth_token;
       _this.loginPV.email = userData.email;
 
-      return Fliplet.App.Storage.set(_this.pvNameStorage, {
-        auth_token: userData.auth_token,
+      return updateUserData({
+        id: userData.id,
+        region: userData.region,
         userRoleId: userData.userRoleId,
+        authToken: userData.auth_token,
         email: userData.email
       });
-
     }).then(function() {
       _this.$container.find('.two-factor-btn').removeClass('disabled');
       _this.$container.find('.two-factor-btn').html(LABELS.authDefault);
