@@ -79,9 +79,9 @@ $('[data-login-id]').each(function() {
 
       var user = createUserProfile(response);
 
-      passwordMustBeChanged = response.user.policy
-        && response.user.policy.password
-        && response.user.policy.password.mustBeChanged;
+      passwordMustBeChanged = response.policy
+        && response.policy.password
+        && response.policy.password.mustBeChanged;
 
       return updateUserData({
         id: response.id,
@@ -102,10 +102,11 @@ $('[data-login-id]').each(function() {
       }
 
       if (Fliplet.Env.get('disableSecurity')) {
-        return;
+        return Fliplet.UI.Toast('Logged in successfully. Redirection to other screens is disabled while in "disabled security" mode.');
       }
       Fliplet.Navigate.to(_this.data.action);
     }).catch(function(err) {
+      console.error(err);
       _this.$container.find('.btn-login').removeClass('disabled');
       _this.$container.find('.btn-login').html(LABELS.loginDefault);
       if (err && err.status === TWO_FACTOR_ERROR_CODE) {
@@ -117,7 +118,7 @@ $('[data-login-id]').each(function() {
         calculateElHeight($('.state.present'));
         return;
       }
-      var errorMessage = genericErrorMessage;
+      var errorMessage = (err && err.message || err.description) || genericErrorMessage;
       if (err && err.responseJSON) {
         errorMessage = err.responseJSON.message;
       }
@@ -232,15 +233,17 @@ $('[data-login-id]').each(function() {
 
     return Fliplet.API.request({
       method: 'PUT',
-      url: '/v1/user',
+      url: 'v1/user',
       data: {
         currentPassword: userPassword,
         newPassword: password
       }
     }).then(function() {
       if (Fliplet.Env.get('disableSecurity')) {
-        return;
+        return Fliplet.UI.Toast('Your password has been updated successfully. Redirection to other screens is disabled while in "disabled security" mode.');
       }
+
+      Fliplet.UI.Toast('Your password has been updated successfully.');
       
       Fliplet.Navigate.to(_this.data.action);
     }).catch(function(err) {
