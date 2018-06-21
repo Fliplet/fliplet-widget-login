@@ -232,7 +232,7 @@ $('[data-login-id]').each(function() {
 
     return Fliplet.API.request({
       method: 'PUT',
-      url: '/v1/user'
+      url: '/v1/user',
       data: {
         currentPassword: userPassword,
         newPassword: password
