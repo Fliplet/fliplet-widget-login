@@ -240,6 +240,7 @@ $('[data-login-id]').each(function() {
       }
     }).then(function() {
       if (Fliplet.Env.get('disableSecurity')) {
+        $('.btn-force-update-pass').html('Update password').removeClass('disabled');
         return Fliplet.UI.Toast('Your password has been updated successfully. Redirection to other screens is disabled while in "disabled security" mode.');
       }
 
@@ -247,7 +248,7 @@ $('[data-login-id]').each(function() {
       
       Fliplet.Navigate.to(_this.data.action);
     }).catch(function(err) {
-      $('.force-update-new-password-error').html(err.responseJSON.message);
+      $('.force-update-new-password-error').html(err.responseJSON.message).removeClass('hidden');
       $('.btn-force-update-pass').html('Update password').removeClass('disabled');
       calculateElHeight($('.state.present'));
     });
