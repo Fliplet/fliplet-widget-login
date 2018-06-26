@@ -98,5 +98,22 @@
       </form>
       <div class="resend-code-area two-factor-resend btn btn-link hidden">Send new code</div>
     </div>
+    <div class="state future" data-state="force-update-pass">
+      <h3 class="aligncenter">Your password needs to be updated</h3>
+      <p>Your organization has updated its password policy and you will need to update your password to keep meeting the security requirements.</p>
+      <form class="fliplet-force-update-password">
+        <div class="form-group clearfix ">
+          <input type="password" class="form-control force-update-new-password" name="force-update-new-password" placeholder="Enter new password" required>
+        </div>
+        <div class="form-group clearfix ">
+          <input type="password" class="form-control force-update-confirm-password" name="force-update-confirm-password" placeholder="Confirm new password" required>
+        </div>
+        <p class="force-update-new-password-error text-danger text-center hidden">Passwords don't match.</p>
+        <div class="login-button-holder">
+          <button type="submit" class="btn btn-primary btn-force-update-pass">Update password</button>
+          <button type="button" class="btn btn-link btn-force-update-cancel">Cancel</button>
+        </div>
+      </form>
+    </div>
   </div>
 </div>

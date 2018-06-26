@@ -19,6 +19,7 @@ $('[data-login-id]').each(function() {
 
   var loginOptions;
   var userEnteredCode;
+  var userPassword;
 
   document.addEventListener('offline', function() {
     _this.$container.addClass('login-offline');
@@ -61,8 +62,10 @@ $('[data-login-id]').each(function() {
     _this.$container.find('.login-error-holder').removeClass('show');
     _this.$container.find('.login-error-holder').html('');
 
+    var passwordMustBeChanged;
     var userEmail = _this.$container.find('.login_email').val();
-    var userPassword = _this.$container.find('.login_password').val();
+    userPassword = _this.$container.find('.login_password').val();
+
     loginOptions = {
       email: userEmail,
       password: userPassword,
@@ -75,6 +78,10 @@ $('[data-login-id]').each(function() {
       _this.loginPV.email = response.email;
 
       var user = createUserProfile(response);
+
+      passwordMustBeChanged = response.policy
+        && response.policy.password
+        && response.policy.password.mustBeChanged;
 
       return Promise.all([
         updateUserData({
@@ -94,11 +101,19 @@ $('[data-login-id]').each(function() {
       _this.$container.find('.btn-login').removeClass('disabled');
       _this.$container.find('.btn-login').html(LABELS.loginDefault);
 
-      if (Fliplet.Env.get('disableSecurity')) {
+      if (passwordMustBeChanged) {
+        $('.state.present').removeClass('present').addClass('past');
+        $('.state[data-state=force-update-pass]').removeClass('future').addClass('present');
+        calculateElHeight($('.state.present'));
         return;
+      }
+
+      if (Fliplet.Env.get('disableSecurity')) {
+        return Fliplet.UI.Toast('Logged in successfully. Redirection to other screens is disabled while in "disabled security" mode.');
       }
       Fliplet.Navigate.to(_this.data.action);
     }).catch(function(err) {
+      console.error(err);
       _this.$container.find('.btn-login').removeClass('disabled');
       _this.$container.find('.btn-login').html(LABELS.loginDefault);
       if (err && err.status === TWO_FACTOR_ERROR_CODE) {
@@ -110,7 +125,7 @@ $('[data-login-id]').each(function() {
         calculateElHeight($('.state.present'));
         return;
       }
-      var errorMessage = genericErrorMessage;
+      var errorMessage = (err && err.message || err.description) || genericErrorMessage;
       if (err && err.responseJSON) {
         errorMessage = err.responseJSON.message;
       }
@@ -203,6 +218,45 @@ $('[data-login-id]').each(function() {
       $('[data-state="forgot-code"]').removeClass('past').addClass('present');
       $('.forgot-verify-error').removeClass('hidden');
       $('.btn-reset-pass').html('Reset password').removeClass('disabled');
+      calculateElHeight($('.state.present'));
+    });
+  });
+
+  $('.fliplet-force-update-password').on('submit', function(e) {
+    e.preventDefault();
+    $('.force-update-new-password-error').addClass('hidden');
+    $('.btn-force-update-pass').html('Updating...').addClass('disabled');
+
+    // Checks if passwords match
+    var password = $('.force-update-new-password').val();
+    var confirmation = $('.force-update-confirm-password').val();
+
+    if (password !== confirmation) {
+      $('.force-update-new-password-error').removeClass('hidden');
+      $('.btn-force-update-pass').html('Update password').removeClass('disabled');
+      calculateElHeight($('.state.present'));
+      return;
+    }
+
+    return Fliplet.API.request({
+      method: 'PUT',
+      url: 'v1/user',
+      data: {
+        currentPassword: userPassword,
+        newPassword: password
+      }
+    }).then(function() {
+      if (Fliplet.Env.get('disableSecurity')) {
+        $('.btn-force-update-pass').html('Update password').removeClass('disabled');
+        return Fliplet.UI.Toast('Your password has been updated successfully. Redirection to other screens is disabled while in "disabled security" mode.');
+      }
+
+      Fliplet.UI.Toast('Your password has been updated successfully.');
+      
+      Fliplet.Navigate.to(_this.data.action);
+    }).catch(function(err) {
+      $('.force-update-new-password-error').html(err.responseJSON.message).removeClass('hidden');
+      $('.btn-force-update-pass').html('Update password').removeClass('disabled');
       calculateElHeight($('.state.present'));
     });
   });
