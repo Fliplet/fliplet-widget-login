@@ -83,13 +83,20 @@ $('[data-login-id]').each(function() {
         && response.policy.password
         && response.policy.password.mustBeChanged;
 
-      return updateUserData({
-        id: response.id,
-        region: response.region,
-        userRoleId: response.userRoleId,
-        authToken: response.auth_token,
-        email: response.email
-      });
+      return Promise.all([
+        updateUserData({
+          id: response.id,
+          region: response.region,
+          userRoleId: response.userRoleId,
+          authToken: response.auth_token,
+          email: response.email,
+          legacy: response.legacy
+        }),
+        Fliplet.Profile.set({
+          email: response.email,
+          user: user
+        })
+      ]);
     }).then(function() {
       _this.$container.find('.btn-login').removeClass('disabled');
       _this.$container.find('.btn-login').html(LABELS.loginDefault);
@@ -311,7 +318,8 @@ $('[data-login-id]').each(function() {
         region: userData.region,
         userRoleId: userData.userRoleId,
         authToken: userData.auth_token,
-        email: userData.email
+        email: userData.email,
+        legacy: userData.legacy
       });
     }).then(function() {
       _this.$container.find('.two-factor-btn').removeClass('disabled');
@@ -345,7 +353,7 @@ $('[data-login-id]').each(function() {
       id: data.id
     });
 
-    return Promise.all([
+    var promises = [
       Fliplet.App.Storage.set(_this.pvNameStorage, {
         userRoleId: data.userRoleId,
         auth_token: data.authToken,
@@ -355,7 +363,13 @@ $('[data-login-id]').each(function() {
         email: data.email,
         user: user
       })
-    ]);
+    ];
+
+    if (Fliplet.Env.is('native')) {
+      promises.push(Fliplet.Native.Authentication.saveUserDetails(data));
+    }
+
+    return Promise.all(promises);
   }
 
   function init() {
@@ -372,7 +386,8 @@ $('[data-login-id]').each(function() {
           region: session.auth_token.substr(0, 2),
           userRoleId: session.user.userRoleId,
           authToken: session.auth_token,
-          email: session.user.email
+          email: session.user.email,
+          legacy: session.legacy
         });
       })
       .then(function () {
@@ -388,7 +403,8 @@ $('[data-login-id]').each(function() {
               region: response.region,
               userRoleId: response.user.userRoleId,
               authToken: response.user.auth_token,
-              email: response.user.email
+              email: response.user.email,
+              legacy: response.user.legacy
             });
           });
       })
