@@ -344,7 +344,7 @@ $('[data-login-id]').each(function() {
               userRoleId: response.user.userRoleId,
               authToken: response.user.auth_token,
               email: response.user.email,
-              legacy: session.legacy
+              legacy: response.user.legacy
             });
           });
       })
