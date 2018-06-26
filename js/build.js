@@ -309,7 +309,7 @@ $('[data-login-id]').each(function() {
       promises.push(Fliplet.Native.Authentication.saveUserDetails(data));
     }
 
-    return promises;
+    return Promise.all(promises);
   }
 
   function init() {
