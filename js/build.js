@@ -76,14 +76,20 @@ $('[data-login-id]').each(function() {
 
       var user = createUserProfile(response);
 
-      return updateUserData({
-        id: response.id,
-        region: response.region,
-        userRoleId: response.userRoleId,
-        authToken: response.auth_token,
-        email: response.email,
-        legacy: response.legacy
-      });
+      return Promise.all([
+        updateUserData({
+          id: response.id,
+          region: response.region,
+          userRoleId: response.userRoleId,
+          authToken: response.auth_token,
+          email: response.email,
+          legacy: response.legacy
+        }),
+        Fliplet.Profile.set({
+          email: response.email,
+          user: user
+        })
+      ]);
     }).then(function() {
       _this.$container.find('.btn-login').removeClass('disabled');
       _this.$container.find('.btn-login').html(LABELS.loginDefault);
