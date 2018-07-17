@@ -372,22 +372,32 @@ $('[data-login-id]').each(function() {
     return Promise.all(promises);
   }
 
+  function getUserFromSession(session) {
+    if (!session.entries || !session.entries.flipletLogin) {
+      throw new Error('Login session not found');
+    }
+
+    return session.entries.flipletLogin;
+  }
+
   function init() {
     _this.loginPV = {};
     Fliplet.User.getCachedSession()
       .then(function(session) {
-        if (!session || !session.user) {
+        if (!session || !session.server || !session.server.flipletLogin) {
           return Promise.reject('Login session not found');
         }
 
+        var loggedUser = getUserFromSession(session);
+
         // Update stored email address based on retrieved session
         return updateUserData({
-          id: session.user.id,
+          id: loggedUser.id || session.user.id,
           region: session.auth_token.substr(0, 2),
-          userRoleId: session.user.userRoleId,
+          userRoleId: loggedUser.userRoleId || session.user.userRoleId,
           authToken: session.auth_token,
-          email: session.user.email,
-          legacy: session.legacy
+          email: loggedUser.email || session.user.email,
+          legacy: loggedUser.legacy || session.legacy
         });
       })
       .then(function () {
@@ -397,14 +407,16 @@ $('[data-login-id]').each(function() {
 
         return validateWeb()
           .then(function (response) {
+            var loggedUser = getUserFromSession(response.session);
+
             // Update stored email address based on retrieved response
             return updateUserData({
-              id: response.user.id,
+              id: loggedUser.id || response.user.id,
               region: response.region,
-              userRoleId: response.user.userRoleId,
-              authToken: response.user.auth_token,
-              email: response.user.email,
-              legacy: response.user.legacy
+              userRoleId: loggedUser.userRoleId || response.user.userRoleId,
+              authToken: response.session.auth_token,
+              email: loggedUser.email || response.user.email,
+              legacy: loggedUser.legacy || response.user.legacy
             });
           });
       })
@@ -417,7 +429,6 @@ $('[data-login-id]').each(function() {
         if (typeof navigate === 'object' && typeof navigate.then === 'function') {
           return navigate;
         }
-        return Promise.resolve();
       })
       .catch(function (error) {
         console.warn(error);
