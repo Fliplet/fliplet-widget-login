@@ -373,16 +373,11 @@ $('[data-login-id]').each(function() {
   }
 
   function getUserFromSession(session) {
-    var loggedUser = session.server.flipletLogin;
-    if (Array.isArray(loggedUser)) {
-      loggedUser = loggedUser[0];
-    }
-
-    if (!loggedUser) {
+    if (!session.entries || !session.entries.flipletLogin) {
       throw new Error('Login session not found');
     }
 
-    return loggedUser;
+    return session.entries.flipletLogin;
   }
 
   function init() {
