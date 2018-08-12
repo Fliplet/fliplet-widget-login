@@ -71,10 +71,16 @@ $('[data-login-id]').each(function() {
       session: true,
       passport: true
     };
+
     login(loginOptions).then(function(response) {
       passwordMustBeChanged = response.policy
         && response.policy.password
         && response.policy.password.mustBeChanged;
+
+      Fliplet.Analytics.trackEvent({
+        category: 'login_fliplet',
+        action: 'login_pass'
+      });
 
       return updateUserData({
         id: response.id,
@@ -105,6 +111,11 @@ $('[data-login-id]').each(function() {
       _this.$container.find('.btn-login').removeClass('disabled');
       _this.$container.find('.btn-login').html(LABELS.loginDefault);
       if (err && err.status === TWO_FACTOR_ERROR_CODE) {
+        Fliplet.Analytics.trackEvent({
+          category: 'login_fliplet',
+          action: 'login_2fa_required'
+        });
+
         if (err.responseJSON.condition !== ONE_TIME_2FA_OPTION) {
           $('.two-factor-resend').removeClass('hidden');
         }
@@ -113,6 +124,12 @@ $('[data-login-id]').each(function() {
         calculateElHeight($('.state.present'));
         return;
       }
+
+      Fliplet.Analytics.trackEvent({
+        category: 'login_fliplet',
+        action: 'login_fail'
+      });
+
       var errorMessage = (err && err.message || err.description) || genericErrorMessage;
       if (err && err.responseJSON) {
         errorMessage = err.responseJSON.message;
@@ -149,6 +166,11 @@ $('[data-login-id]').each(function() {
     e.preventDefault();
     $('.forgot-verify-error').addClass('hidden');
     email = $('.forgot-email-address').val();
+
+    Fliplet.Analytics.trackEvent({
+      category: 'login_fliplet',
+      action: 'forgot_password'
+    });
 
     return Fliplet.API.request({
       method: 'POST',
@@ -297,6 +319,11 @@ $('[data-login-id]').each(function() {
     $('.help-two-factor').addClass('hidden');
     loginOptions.twofactor = twoFactorCode;
     login(loginOptions).then(function(userData) {
+      Fliplet.Analytics.trackEvent({
+        category: 'login_fliplet',
+        action: 'login_pass'
+      });
+
       return updateUserData({
         id: userData.id,
         region: userData.region,
