@@ -15,7 +15,6 @@ $('[data-login-id]').each(function() {
   _this.id = _this.$container.attr('data-login-id');
   _this.data = Fliplet.Widget.getData(_this.id);
   _this.pvNameStorage = 'fliplet_login_component';
-  _this.pvName = 'login_component_' + _this.id;
 
   var loginOptions;
   var userEnteredCode;
@@ -73,30 +72,18 @@ $('[data-login-id]').each(function() {
       passport: true
     };
     login(loginOptions).then(function(response) {
-      _this.loginPV.userRoleId = response.userRoleId;
-      _this.loginPV.auth_token = response.auth_token;
-      _this.loginPV.email = response.email;
-
-      var user = createUserProfile(response);
-
       passwordMustBeChanged = response.policy
         && response.policy.password
         && response.policy.password.mustBeChanged;
 
-      return Promise.all([
-        updateUserData({
-          id: response.id,
-          region: response.region,
-          userRoleId: response.userRoleId,
-          authToken: response.auth_token,
-          email: response.email,
-          legacy: response.legacy
-        }),
-        Fliplet.Profile.set({
-          email: response.email,
-          user: user
-        })
-      ]);
+      return updateUserData({
+        id: response.id,
+        region: response.region,
+        userRoleId: response.userRoleId,
+        authToken: response.auth_token,
+        email: response.email,
+        legacy: response.legacy
+      });
     }).then(function() {
       _this.$container.find('.btn-login').removeClass('disabled');
       _this.$container.find('.btn-login').html(LABELS.loginDefault);
@@ -109,7 +96,8 @@ $('[data-login-id]').each(function() {
       }
 
       if (Fliplet.Env.get('disableSecurity')) {
-        return Fliplet.UI.Toast('Logged in successfully. Redirection to other screens is disabled while in "disabled security" mode.');
+        console.log('Redirection to other screens is disabled when security isn\'t enabled.');
+        return Fliplet.UI.Toast('Login successful');
       }
       Fliplet.Navigate.to(_this.data.action);
     }).catch(function(err) {
@@ -248,10 +236,11 @@ $('[data-login-id]').each(function() {
     }).then(function() {
       if (Fliplet.Env.get('disableSecurity')) {
         $('.btn-force-update-pass').html('Update password').removeClass('disabled');
-        return Fliplet.UI.Toast('Your password has been updated successfully. Redirection to other screens is disabled while in "disabled security" mode.');
+        console.log('Redirection to other screens is disabled when security isn\'t enabled.');
+        return Fliplet.UI.Toast('Password updated');
       }
 
-      Fliplet.UI.Toast('Your password has been updated successfully.');
+      Fliplet.UI.Toast('Password updated');
       
       Fliplet.Navigate.to(_this.data.action);
     }).catch(function(err) {
@@ -298,8 +287,7 @@ $('[data-login-id]').each(function() {
   $('.fliplet-two-factor').on('submit', function(e) {
     e.preventDefault();
     var twoFactorCode = $('.two-factor-code').val();
-    _this.$container.find('.two-factor-btn').addClass('disabled');
-    _this.$container.find('.two-factor-btn').html(LABELS.authProcessing);
+    _this.$container.find('.two-factor-btn').addClass('disabled').html(LABELS.authProcessing);
 
     if (twoFactorCode === '') {
       $('.two-factor-not-valid').removeClass('hidden');
@@ -309,10 +297,6 @@ $('[data-login-id]').each(function() {
     $('.help-two-factor').addClass('hidden');
     loginOptions.twofactor = twoFactorCode;
     login(loginOptions).then(function(userData) {
-      _this.loginPV.userRoleId = userData.userRoleId;
-      _this.loginPV.auth_token = userData.auth_token;
-      _this.loginPV.email = userData.email;
-
       return updateUserData({
         id: userData.id,
         region: userData.region,
@@ -322,8 +306,7 @@ $('[data-login-id]').each(function() {
         legacy: userData.legacy
       });
     }).then(function() {
-      _this.$container.find('.two-factor-btn').removeClass('disabled');
-      _this.$container.find('.two-factor-btn').html(LABELS.authDefault);
+      _this.$container.find('.two-factor-btn').removeClass('disabled').html(LABELS.authDefault);
 
       if (Fliplet.Env.get('disableSecurity')) {
         return;
@@ -331,8 +314,7 @@ $('[data-login-id]').each(function() {
 
       Fliplet.Navigate.to(_this.data.action);
     }).catch(function(error) {
-      _this.$container.find('.two-factor-btn').removeClass('disabled');
-      _this.$container.find('.two-factor-btn').html(LABELS.authDefault);
+      _this.$container.find('.two-factor-btn').removeClass('disabled').html(LABELS.authDefault);
       $('.two-factor-not-valid').removeClass('hidden');
       calculateElHeight($('.state[data-state=two-factor-code]'));
     });
@@ -340,8 +322,9 @@ $('[data-login-id]').each(function() {
 
   function showStart(){
     setTimeout(function(){
-      $('[data-login-id="'+_this.id+'"] .login-loader-holder').fadeOut(100, function() {
-        $('[data-login-id="'+_this.id+'"] .login-form-holder').fadeIn(300);
+      var $loginHolder = _this.$container.find('.login-loader-holder');
+      $loginHolder.fadeOut(100, function() {
+        $loginHolder.fadeIn(300);
         calculateElHeight($('.state.start'));
       });
     }, 100);
@@ -372,32 +355,21 @@ $('[data-login-id]').each(function() {
     return Promise.all(promises);
   }
 
-  function getUserFromSession(session) {
-    if (!session.entries || !session.entries.flipletLogin) {
-      throw new Error('Login session not found');
-    }
-
-    return session.entries.flipletLogin;
-  }
-
   function init() {
-    _this.loginPV = {};
     Fliplet.User.getCachedSession()
       .then(function(session) {
-        if (!session || !session.server || !session.server.flipletLogin) {
+        if (!session || !session.user) {
           return Promise.reject('Login session not found');
         }
 
-        var loggedUser = getUserFromSession(session);
-
         // Update stored email address based on retrieved session
         return updateUserData({
-          id: loggedUser.id || session.user.id,
+          id: session.user.id,
           region: session.auth_token.substr(0, 2),
-          userRoleId: loggedUser.userRoleId || session.user.userRoleId,
+          userRoleId: session.user.userRoleId,
           authToken: session.auth_token,
-          email: loggedUser.email || session.user.email,
-          legacy: loggedUser.legacy || session.legacy
+          email: session.user.email,
+          legacy: session.legacy
         });
       })
       .then(function () {
@@ -407,28 +379,27 @@ $('[data-login-id]').each(function() {
 
         return validateWeb()
           .then(function (response) {
-            var loggedUser = getUserFromSession(response.session);
-
             // Update stored email address based on retrieved response
             return updateUserData({
-              id: loggedUser.id || response.user.id,
+              id: response.user.id,
               region: response.region,
-              userRoleId: loggedUser.userRoleId || response.user.userRoleId,
-              authToken: response.session.auth_token,
-              email: loggedUser.email || response.user.email,
-              legacy: loggedUser.legacy || response.user.legacy
+              userRoleId: response.user.userRoleId,
+              authToken: response.user.auth_token,
+              email: response.user.email,
+              legacy: response.user.legacy
             });
           });
       })
       .then(function () {
         if (Fliplet.Env.get('disableSecurity')) {
-          return Promise.reject('Login verified. Navigation is disabled due to security being disabled.');
+          return Promise.reject('Login verified. Redirection is disabled when security isn\'t enabled.');
         }
 
         var navigate = Fliplet.Navigate.to(_this.data.action);
         if (typeof navigate === 'object' && typeof navigate.then === 'function') {
           return navigate;
         }
+        return Promise.resolve();
       })
       .catch(function (error) {
         console.warn(error);
@@ -438,11 +409,14 @@ $('[data-login-id]').each(function() {
 
   function validateWeb() {
     //validate token
-    return request({
-      method: 'GET',
-      url: 'v1/user',
-      token: _this.loginPV.auth_token
-    });
+    return Fliplet.App.Storage.get(_this.pvNameStorage)
+      .then(function (storage) {
+        return request({
+          method: 'GET',
+          url: 'v1/user',
+          token: storage.auth_token
+        });
+      });
   }
 
   function login(options) {
