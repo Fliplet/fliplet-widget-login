@@ -16,6 +16,11 @@ $('[data-login-id]').each(function() {
   _this.data = Fliplet.Widget.getData(_this.id);
   _this.pvNameStorage = 'fliplet_login_component';
 
+  // Do not track login related redirects
+  if (typeof _this.data.action !== 'undefined') {
+    _this.data.action.track = false;
+  }
+
   var loginOptions;
   var userEnteredCode;
   var userPassword;
