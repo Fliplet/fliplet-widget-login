@@ -356,7 +356,7 @@ $('[data-login-id]').each(function() {
     setTimeout(function(){
       var $loginHolder = _this.$container.find('.login-loader-holder');
       $loginHolder.fadeOut(100, function() {
-        $loginHolder.fadeIn(300);
+        _this.$container.find('.content-wrapper').show();
         calculateElHeight($('.state.start'));
       });
     }, 100);
@@ -425,6 +425,10 @@ $('[data-login-id]').each(function() {
       .then(function () {
         if (Fliplet.Env.get('disableSecurity')) {
           return Promise.reject('Login verified. Redirection is disabled when security isn\'t enabled.');
+        }
+
+        if (Fliplet.Env.get('interact')) {
+          return Promise.reject('Login verified. Redirection is disabled when editing screens.');
         }
 
         var navigate = Fliplet.Navigate.to(_this.data.action);
