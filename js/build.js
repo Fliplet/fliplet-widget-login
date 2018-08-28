@@ -268,7 +268,7 @@ $('[data-login-id]').each(function() {
       }
 
       Fliplet.UI.Toast('Password updated');
-      
+
       Fliplet.Navigate.to(_this.data.action);
     }).catch(function(err) {
       $('.force-update-new-password-error').html(err.responseJSON.message).removeClass('hidden');
@@ -390,7 +390,14 @@ $('[data-login-id]').each(function() {
   function init() {
     Fliplet.User.getCachedSession()
       .then(function(session) {
-        if (!session || !session.user) {
+        var passport = session && session.accounts && session.accounts.flipletLogin;
+
+        if (passport) {
+          session.user = _.extend(session.user, passport[0]);
+          session.user.type = null;
+        }
+
+        if (!session || !session.user || session.user.type !== null) {
           return Promise.reject('Login session not found');
         }
 
