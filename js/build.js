@@ -306,7 +306,7 @@ $('[data-login-id]').each(function() {
       }
       _that.removeClass('disabled');
       _that.html(LABELS.sendDefault);
-      $('.two-factor-enable-to-resend').removeClass('hidden');
+      $('.two-factor-unable-to-resend').removeClass('hidden');
       calculateElHeight($('.state[data-state=two-factor-code]'));
     });
   });
