@@ -179,7 +179,7 @@ $('[data-login-id]').each(function() {
 
     return Fliplet.API.request({
       method: 'POST',
-      url: '/v1/auth/forgot?method=code',
+      url: 'v1/auth/forgot?method=code',
       data: {
         email: email
       }
@@ -218,7 +218,7 @@ $('[data-login-id]').each(function() {
 
     return Fliplet.API.request({
       method: 'POST',
-      url: '/v1/auth/reset/' + userEnteredCode,
+      url: 'v1/auth/reset/' + userEnteredCode,
       data: {
         email: email,
         password: password
