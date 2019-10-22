@@ -380,10 +380,6 @@ $('[data-login-id]').each(function() {
       })
     ];
 
-    if (Fliplet.Env.is('native')) {
-      promises.push(Fliplet.Native.Authentication.saveUserDetails(data));
-    }
-
     return Promise.all(promises);
   }
 
