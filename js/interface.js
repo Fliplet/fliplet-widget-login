@@ -3,6 +3,12 @@ var data = Fliplet.Widget.getData(widgetId) || {};
 var headingValue = data.heading || "Welcome to the login of this app";
 $('#login_heading').val(headingValue).trigger('change');
 
+var page = Fliplet.Widget.getPage();
+var omitPages = page ? [page.id] : [];
+
+data.action = data.action || {};
+data.action.omitPages = omitPages;
+
 var linkActionProvider = Fliplet.Widget.open('com.fliplet.link', {
   // If provided, the iframe will be appended here,
   // otherwise will be displayed as a full-size iframe overlay
