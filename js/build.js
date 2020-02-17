@@ -144,7 +144,6 @@ $('[data-login-id]').each(function() {
       _this.$container.find('.login-error-holder').addClass('show');
       calculateElHeight($('.state.present'));
     });
-
   });
 
   $('.btn-forgot-pass').on('click', function() {
@@ -170,7 +169,7 @@ $('[data-login-id]').each(function() {
   $('.fliplet-forgot-password').on('submit', function(e) {
     e.preventDefault();
     $('.forgot-verify-error').addClass('hidden');
-    email = $('.forgot-email-address').val();
+    var email = $('.forgot-email-address').val();
 
     Fliplet.Analytics.trackEvent({
       category: 'login_fliplet',
@@ -345,15 +344,15 @@ $('[data-login-id]').each(function() {
       }
 
       Fliplet.Navigate.to(_this.data.action);
-    }).catch(function(error) {
+    }).catch(function() {
       _this.$container.find('.two-factor-btn').removeClass('disabled').html(LABELS.authDefault);
       $('.two-factor-not-valid').removeClass('hidden');
       calculateElHeight($('.state[data-state=two-factor-code]'));
     });
   });
 
-  function showStart(){
-    setTimeout(function(){
+  function showStart() {
+    setTimeout(function() {
       var $loginHolder = _this.$container.find('.login-loader-holder');
       $loginHolder.fadeOut(100, function() {
         _this.$container.find('.content-wrapper').show();
@@ -407,13 +406,13 @@ $('[data-login-id]').each(function() {
           legacy: session.legacy
         });
       })
-      .then(function () {
+      .then(function() {
         if (!Fliplet.Navigator.isOnline()) {
           return Promise.resolve();
         }
 
         return validateWeb()
-          .then(function (response) {
+          .then(function(response) {
             // Update stored email address based on retrieved response
             return updateUserData({
               id: response.user.id,
@@ -425,7 +424,7 @@ $('[data-login-id]').each(function() {
             });
           });
       })
-      .then(function () {
+      .then(function() {
         if (Fliplet.Env.get('disableSecurity')) {
           return Promise.reject('Login verified. Redirection is disabled when security isn\'t enabled.');
         }
@@ -440,16 +439,16 @@ $('[data-login-id]').each(function() {
         }
         return Promise.resolve();
       })
-      .catch(function (error) {
+      .catch(function(error) {
         console.warn(error);
         showStart();
       });
   }
 
   function validateWeb() {
-    //validate token
+    // validate token
     return Fliplet.App.Storage.get(_this.pvNameStorage)
-      .then(function (storage) {
+      .then(function(storage) {
         return request({
           method: 'GET',
           url: 'v1/user',
@@ -467,7 +466,7 @@ $('[data-login-id]').each(function() {
   }
 
   function request(data) {
-    //validate token
+    // validate token
     return Fliplet.Navigator.onReady().then(function() {
       data.url = Fliplet.Env.get('apiUrl') + data.url;
       data.headers = data.headers || {};
@@ -487,7 +486,6 @@ $('[data-login-id]').each(function() {
   }
 
   if (Fliplet.Env.get('platform') === 'web') {
-
     init();
 
     if (Fliplet.Env.get('interact')) {
@@ -502,7 +500,7 @@ $('[data-login-id]').each(function() {
         }, 500);
       }
     });
-    _this.$container.on("fliplet_page_reloaded", function() {
+    _this.$container.on('fliplet_page_reloaded', function() {
       if (Fliplet.Env.get('interact')) {
         setTimeout(function() {
           _this.$container.removeClass('hidden');
@@ -510,6 +508,6 @@ $('[data-login-id]').each(function() {
       }
     });
   } else {
-    document.addEventListener("deviceready", init);
+    document.addEventListener('deviceready', init);
   }
 });
