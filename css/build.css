@@ -171,3 +171,8 @@ input.form-control:focus {
 		padding: 0 12.5%;
 	}
 }
+
+/* Fix component view when it is placed in the container */
+[data-widget-package="com.fliplet.login"] {
+  width: 100%;
+}
