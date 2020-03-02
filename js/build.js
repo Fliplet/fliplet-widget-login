@@ -1,4 +1,4 @@
-$('[data-login-id]').each(function() {
+Fliplet.Widget.instance('login', function(data) {
   var _this = this;
   var TWO_FACTOR_ERROR_CODE = 428;
   var ONE_TIME_2FA_OPTION = 'onetime';
@@ -12,8 +12,7 @@ $('[data-login-id]').each(function() {
     sendProcessing: 'Sending...'
   };
   _this.$container = $(this);
-  _this.id = _this.$container.attr('data-login-id');
-  _this.data = Fliplet.Widget.getData(_this.id);
+  _this.data = data;
   _this.pvNameStorage = 'fliplet_login_component';
 
   // Do not track login related redirects
