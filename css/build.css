@@ -40,8 +40,8 @@ input.form-control:focus {
 	text-align: center;
 }
 
-.btn-fliplet-login {
-  display: block;
+.btn-fliplet-login,
+.btn-continue {
   clear: both;
   width: 100%;
   min-width: 45%;
@@ -54,10 +54,30 @@ input.form-control:focus {
   border-radius: 6px;
 }
 
-.btn-fliplet-login:focus,
-.btn-fliplet-login:hover,
-.btn:active:focus {
+.btn-continue {
+  display: block;
+}
+
+[data-auth-type] .btn-fliplet-login,
+[data-auth-type] .btn-forgot-pass,
+[data-auth-type] .password {
+  display: none;
+}
+
+.login-form-holder .btn:focus,
+.login-form-holder .btn:hover,
+.login-form-holder .btn:active:focus {
   outline: none;
+}
+
+[data-auth-type="password"] .btn-fliplet-login,
+[data-auth-type="password"] .btn-forgot-pass,
+[data-auth-type="password"] .password {
+  display: block;
+}
+
+[data-auth-type="password"] .btn-continue {
+  display: none;
 }
 
 @media (min-width:640px) {

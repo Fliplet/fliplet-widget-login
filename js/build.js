@@ -9,11 +9,18 @@ Fliplet.Widget.instance('login', function(data) {
     authDefault: 'Verify',
     authProcessing: 'Verifying...',
     sendDefault: 'Send new code',
-    sendProcessing: 'Sending...'
+    sendProcessing: 'Sending...',
+    continuDefault :'Continue',
+    continueProcessing: 'Please wait...'
   };
   _this.$container = $(this);
   _this.data = data;
   _this.pvNameStorage = 'fliplet_login_component';
+  var studioUrls = {
+    'https://api.fliplet.test/': 'http://localhost:8080/',
+    'https://staging.api.fliplet.com/': 'https://staging2.studio.fliplet.com',
+    'https://api.fliplet.com/': 'https://production.studio.fliplet.com'
+  };
 
   // Do not track login related redirects
   if (typeof _this.data.action !== 'undefined') {
@@ -60,13 +67,105 @@ Fliplet.Widget.instance('login', function(data) {
   $('.login-form').on('submit', function(e) {
     e.preventDefault();
 
+    var $form = $(this);
+    var userEmail = ($form.find('.login_email').val() || '').toLowerCase().trim();
+
+    if (!userEmail) {
+      return Fliplet.UI.Toast('Please enter an email');
+    }
+
+    if (!$form.attr('data-auth-type')) {
+      $form.find('.btn-continue').html(LABELS.continueProcessing).addClass('disabled');
+
+      Fliplet.API.request({
+        method: 'POST',
+        url: 'v1/auth/credential-types',
+        data: {
+          email: userEmail,
+          target_session_auth_token: Fliplet.User.getAuthToken()
+        }
+      }).then(function (credential) {
+        credential = credential || {};
+
+        $form.find('.btn-continue').html(LABELS.continuDefault).removeClass('disabled');
+
+        if (_.isEmpty(credential.types)) {
+          // Redirect user to Studio to reset password
+          var resetPasswordUrl = studioUrls[Fliplet.Env.get('apiUrl')] + 'signin?action=reset-password&email=' + userEmail;
+
+          return Fliplet.Navigate.url(resetPasswordUrl);
+        }
+
+        var ssoCredential = _.find(credential.types, (credential) => {
+          return credential.type.indexOf('sso-') === 0;
+        });
+
+        if (ssoCredential) {
+          // Redirect user to SSO login URL
+          var ssoLoginUrl = (Fliplet.Env.get('primaryApiUrl') || Fliplet.Env.get('apiUrl')) + 'v1/auth/login/' + ssoCredential.type + '?token=' + ssoCredential.token;
+
+          return new Promise(function (resolve, reject) {
+            Fliplet.Navigate.to({
+              action: 'url',
+              inAppBrowser: true,
+              handleAuthorization: false,
+              url: ssoLoginUrl,
+              onclose: function() {
+                Fliplet.Session.get().then(function(session) {
+                  var passport = session && session.accounts && session.accounts.flipletLogin;
+
+                  if (passport) {
+                    session.user = _.extend(session.user, passport[0]);
+                    session.user.type = null;
+                  }
+
+                  if (!session || !session.user || session.user.type !== null) {
+                    return reject('You didn\'t finish the login process.');
+                  }
+
+                  // Update stored email address based on retrieved session
+                  updateUserData({
+                    id: session.user.id,
+                    region: session.auth_token.substr(0, 2),
+                    userRoleId: session.user.userRoleId,
+                    authToken: session.auth_token,
+                    email: session.user.email,
+                    legacy: session.legacy
+                  }).then(function () {
+                    return validateWeb();
+                  }).then(function (response) {
+                    if (userMustSetupAccount(response)) {
+                      goToAccountSetup().then(resolve);
+                    } else {
+                      resolve();
+                    }
+                  });
+                });
+              }
+            });
+          }).then(function () {
+            onLogin();
+          });
+        }
+
+        // @TODO Add Back button to reset form
+        $form.attr('data-auth-type', 'password');
+        $form.find('.login_password').focus().prop('required', true);
+        calculateElHeight($('.state.present'));
+      }).catch(function (error) {
+        Fliplet.UI.Toast.error(error, {
+          message: 'There was an error logging in'
+        });
+      });
+      return;
+    }
+
     _this.$container.find('.btn-login').addClass('disabled');
     _this.$container.find('.btn-login').html(LABELS.loginProcessing);
     _this.$container.find('.login-error-holder').removeClass('show');
     _this.$container.find('.login-error-holder').html('');
 
     var passwordMustBeChanged;
-    var userEmail = _this.$container.find('.login_email').val();
     userPassword = _this.$container.find('.login_password').val();
 
     loginOptions = {
@@ -86,13 +185,19 @@ Fliplet.Widget.instance('login', function(data) {
         action: 'login_pass'
       });
 
-      return updateUserData({
-        id: response.id,
-        region: response.region,
-        userRoleId: response.userRoleId,
-        authToken: response.auth_token,
-        email: response.email,
-        legacy: response.legacy
+      var accountReady = userMustSetupAccount(response)
+        ? goToAccountSetup()
+        : Promise.resolve();
+
+      return accountReady.then(function () {
+        return updateUserData({
+          id: response.id,
+          region: response.region,
+          userRoleId: response.userRoleId,
+          authToken: response.auth_token,
+          email: response.email,
+          legacy: response.legacy
+        });
       });
     }).then(function() {
       _this.$container.find('.btn-login').removeClass('disabled');
@@ -105,11 +210,7 @@ Fliplet.Widget.instance('login', function(data) {
         return;
       }
 
-      if (Fliplet.Env.get('disableSecurity')) {
-        console.log('Redirection to other screens is disabled when security isn\'t enabled.');
-        return Fliplet.UI.Toast('Login successful');
-      }
-      Fliplet.Navigate.to(_this.data.action);
+      onLogin();
     }).catch(function(err) {
       console.error(err);
       _this.$container.find('.btn-login').removeClass('disabled');
@@ -381,6 +482,43 @@ Fliplet.Widget.instance('login', function(data) {
     return Promise.all(promises);
   }
 
+  function onLogin() {
+    if (Fliplet.Env.get('disableSecurity')) {
+      console.log('Redirection to other screens is disabled when security isn\'t enabled.');
+      return Fliplet.UI.Toast('Login successful');
+    }
+
+    Fliplet.Navigate.to(_this.data.action);
+  }
+
+  function userMustSetupAccount(data) {
+    data = data || {};
+    return data.mustLinkTwoFactor
+      || data.mustUpdateProfile
+      || data.mustUpdateAgreements
+      || _.get(data, 'policy.password.mustBeChanged');
+  }
+
+  function goToAccountSetup() {
+    return new Promise(function (resolve, reject) {
+      Fliplet.Navigate.url({
+        url: (Fliplet.Env.get('primaryApiUrl') || Fliplet.Env.get('apiUrl')) + 'v1/auth/redirect',
+        inAppBrowser: true,
+        onclose: function() {
+          validateWeb()
+            .then(function(response) {
+              // Update stored email address based on retrieved response
+              if (userMustSetupAccount(response)) {
+                goToAccountSetup().then(resolve);
+              } else {
+                resolve();
+              }
+            });
+        }
+      });
+    });
+  }
+
   function init() {
     Fliplet.User.getCachedSession()
       .then(function(session) {
@@ -413,13 +551,19 @@ Fliplet.Widget.instance('login', function(data) {
         return validateWeb()
           .then(function(response) {
             // Update stored email address based on retrieved response
-            return updateUserData({
-              id: response.user.id,
-              region: response.region,
-              userRoleId: response.user.userRoleId,
-              authToken: response.user.auth_token,
-              email: response.user.email,
-              legacy: response.user.legacy
+            var accountReady = userMustSetupAccount(response)
+              ? goToAccountSetup()
+              : Promise.resolve();
+
+            return accountReady.then(function () {
+              return updateUserData({
+                id: response.user.id,
+                region: response.region,
+                userRoleId: response.user.userRoleId,
+                authToken: response.user.auth_token,
+                email: response.user.email,
+                legacy: response.user.legacy
+              });
             });
           });
       })
