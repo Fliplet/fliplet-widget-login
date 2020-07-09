@@ -444,6 +444,12 @@ Fliplet.Widget.instance('login', function(data) {
         authToken: userData.auth_token,
         email: userData.email,
         legacy: userData.legacy
+      }).then(function () {
+        return validateWeb();
+      }).then(function (response) {
+        if (userMustSetupAccount(response)) {
+          return goToAccountSetup();
+        }
       });
 
 
