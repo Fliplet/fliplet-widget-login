@@ -516,7 +516,7 @@ Fliplet.Widget.instance('login', function(data) {
       return Fliplet.App.Storage.get(_this.pvNameStorage)
         .then(function (storage) {
           Fliplet.Navigate.url({
-            url: (Fliplet.Env.get('primaryApiUrl') || Fliplet.Env.get('apiUrl')) + 'v1/auth/redirect?auth_token=' + storage.auth_token,
+            url: (Fliplet.Env.get('primaryApiUrl') || Fliplet.Env.get('apiUrl')) + 'v1/auth/redirect?auth_token=' + storage.auth_token + '&utm_source=com.fliplet.login',
             inAppBrowser: true,
             onclose: function() {
               validateWeb()
