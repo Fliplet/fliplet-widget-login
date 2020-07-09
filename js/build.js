@@ -111,6 +111,7 @@ Fliplet.Widget.instance('login', function(data) {
             Fliplet.Navigate.to({
               action: 'url',
               inAppBrowser: true,
+              basicAuth: ssoCredential.basicAuth,
               handleAuthorization: false,
               url: ssoLoginUrl,
               onclose: function() {
@@ -131,7 +132,7 @@ Fliplet.Widget.instance('login', function(data) {
                     id: session.user.id,
                     region: session.auth_token.substr(0, 2),
                     userRoleId: session.user.userRoleId,
-                    authToken: session.auth_token,
+                    authToken: session.user.auth_token,
                     email: session.user.email,
                     legacy: session.legacy
                   }).then(function () {
@@ -167,7 +168,6 @@ Fliplet.Widget.instance('login', function(data) {
     _this.$container.find('.login-error-holder').removeClass('show');
     _this.$container.find('.login-error-holder').html('');
 
-    var passwordMustBeChanged;
     userPassword = _this.$container.find('.login_password').val();
 
     loginOptions = {
@@ -178,39 +178,32 @@ Fliplet.Widget.instance('login', function(data) {
     };
 
     login(loginOptions).then(function(response) {
-      passwordMustBeChanged = response.policy
-        && response.policy.password
-        && response.policy.password.mustBeChanged;
+      var user = _.get(response, 'session.server.passports.flipletLogin', [])[0];
+
+      if (!user) {
+        return Promise.reject('Login failed. Please try again later.');
+      }
 
       Fliplet.Analytics.trackEvent({
         category: 'login_fliplet',
         action: 'login_pass'
       });
 
-      var accountReady = userMustSetupAccount(response)
-        ? goToAccountSetup()
-        : Promise.resolve();
-
-      return accountReady.then(function () {
-        return updateUserData({
-          id: response.id,
-          region: response.region,
-          userRoleId: response.userRoleId,
-          authToken: response.auth_token,
-          email: response.email,
-          legacy: response.legacy
-        });
+      return updateUserData({
+        id: response.id,
+        region: user.region,
+        userRoleId: user.userRoleId,
+        authToken: user.auth_token,
+        email: user.email,
+        legacy: response.legacy
+      }).then(function () {
+        if (userMustSetupAccount(response)) {
+          return goToAccountSetup();
+        }
       });
     }).then(function() {
       _this.$container.find('.btn-login').removeClass('disabled');
       _this.$container.find('.btn-login').html(LABELS.loginDefault);
-
-      if (passwordMustBeChanged) {
-        $('.state.present').removeClass('present').addClass('past');
-        $('.state[data-state=force-update-pass]').removeClass('future').addClass('present');
-        calculateElHeight($('.state.present'));
-        return;
-      }
 
       onLogin();
     }).catch(function(err) {
@@ -431,28 +424,30 @@ Fliplet.Widget.instance('login', function(data) {
     }
     $('.help-two-factor').addClass('hidden');
     loginOptions.twofactor = twoFactorCode;
-    login(loginOptions).then(function(userData) {
+    login(loginOptions).then(function(response) {
+      var user = _.get(response, 'session.server.passports.flipletLogin', [])[0];
+
+      if (!user) {
+        return Promise.reject('Login failed. Please try again later.');
+      }
+
       Fliplet.Analytics.trackEvent({
         category: 'login_fliplet',
         action: 'login_pass'
       });
 
       return updateUserData({
-        id: userData.id,
-        region: userData.region,
-        userRoleId: userData.userRoleId,
-        authToken: userData.auth_token,
-        email: userData.email,
-        legacy: userData.legacy
+        id: response.id,
+        region: user.region,
+        userRoleId: user.userRoleId,
+        authToken: user.auth_token,
+        email: user.email,
+        legacy: response.legacy
       }).then(function () {
-        return validateWeb();
-      }).then(function (response) {
         if (userMustSetupAccount(response)) {
           return goToAccountSetup();
         }
       });
-
-
     }).then(function() {
       _this.$container.find('.two-factor-btn').removeClass('disabled').html(LABELS.authDefault);
 
@@ -518,21 +513,24 @@ Fliplet.Widget.instance('login', function(data) {
 
   function goToAccountSetup() {
     return new Promise(function (resolve, reject) {
-      Fliplet.Navigate.url({
-        url: (Fliplet.Env.get('primaryApiUrl') || Fliplet.Env.get('apiUrl')) + 'v1/auth/redirect?auth_token=' + Fliplet.User.getAuthToken(),
-        inAppBrowser: true,
-        onclose: function() {
-          validateWeb()
-            .then(function(response) {
-              // Update stored email address based on retrieved response
-              if (userMustSetupAccount(response)) {
-                goToAccountSetup().then(resolve);
-              } else {
-                resolve();
-              }
-            });
-        }
-      });
+      return Fliplet.App.Storage.get(_this.pvNameStorage)
+        .then(function (storage) {
+          Fliplet.Navigate.url({
+            url: (Fliplet.Env.get('primaryApiUrl') || Fliplet.Env.get('apiUrl')) + 'v1/auth/redirect?auth_token=' + storage.auth_token,
+            inAppBrowser: true,
+            onclose: function() {
+              validateWeb()
+                .then(function(response) {
+                  // Update stored email address based on retrieved response
+                  if (userMustSetupAccount(response)) {
+                    goToAccountSetup().then(resolve);
+                  } else {
+                    resolve();
+                  }
+                });
+            }
+          });
+        })
     });
   }
 
@@ -555,7 +553,7 @@ Fliplet.Widget.instance('login', function(data) {
           id: session.user.id,
           region: session.auth_token.substr(0, 2),
           userRoleId: session.user.userRoleId,
-          authToken: session.auth_token,
+          authToken: session.user.auth_token,
           email: session.user.email,
           legacy: session.legacy
         });
