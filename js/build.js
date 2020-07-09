@@ -519,7 +519,7 @@ Fliplet.Widget.instance('login', function(data) {
   function goToAccountSetup() {
     return new Promise(function (resolve, reject) {
       Fliplet.Navigate.url({
-        url: (Fliplet.Env.get('primaryApiUrl') || Fliplet.Env.get('apiUrl')) + 'v1/auth/redirect',
+        url: (Fliplet.Env.get('primaryApiUrl') || Fliplet.Env.get('apiUrl')) + 'v1/auth/redirect?auth_token=' + Fliplet.User.getAuthToken(),
         inAppBrowser: true,
         onclose: function() {
           validateWeb()
