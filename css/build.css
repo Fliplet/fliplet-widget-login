@@ -41,7 +41,8 @@ input.form-control:focus {
 }
 
 .btn-fliplet-login,
-.btn-continue {
+.btn-continue,
+.btn-login-back {
   clear: both;
   width: 100%;
   min-width: 45%;
@@ -59,6 +60,7 @@ input.form-control:focus {
 }
 
 [data-auth-type] .btn-fliplet-login,
+[data-auth-type] .btn-login-back,
 [data-auth-type] .btn-forgot-pass,
 [data-auth-type] .password {
   display: none;
@@ -72,6 +74,7 @@ input.form-control:focus {
 
 [data-auth-type="password"] .btn-fliplet-login,
 [data-auth-type="password"] .btn-forgot-pass,
+[data-auth-type="password"] .btn-login-back,
 [data-auth-type="password"] .password {
   display: block;
 }
@@ -81,7 +84,9 @@ input.form-control:focus {
 }
 
 @media (min-width:640px) {
-	.btn-fliplet-login {
+	.btn-fliplet-login,
+  .btn-login-back,
+  .btn-continue {
 		clear: none;
 		display: inline-block;
 		width: auto;

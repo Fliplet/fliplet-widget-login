@@ -90,10 +90,13 @@ Fliplet.Widget.instance('login', function(data) {
         $form.find('.btn-continue').html(LABELS.continuDefault).removeClass('disabled');
 
         if (_.isEmpty(credential.types)) {
-          // Redirect user to Studio to reset password
-          var resetPasswordUrl = studioUrls[Fliplet.Env.get('apiUrl')] + 'signin?action=reset-password&email=' + userEmail;
+          // Switch to password reset
+          $('.btn-forgot-pass').trigger('click');
 
-          return Fliplet.Navigate.url(resetPasswordUrl);
+          // Trigger password reset
+          $('.forgot-email-address').val(userEmail);
+          $('.fliplet-forgot-password').trigger('submit');
+          return;
         }
 
         var ssoCredential = _.find(credential.types, (credential) => {
@@ -148,7 +151,6 @@ Fliplet.Widget.instance('login', function(data) {
           });
         }
 
-        // @TODO Add Back button to reset form
         $form.attr('data-auth-type', 'password');
         $form.find('.login_password').focus().prop('required', true);
         calculateElHeight($('.state.present'));
@@ -252,6 +254,12 @@ Fliplet.Widget.instance('login', function(data) {
     calculateElHeight($('.state.present'));
   });
 
+  $('.btn-login-back').on('click', function () {
+    $('.login-form').attr('data-auth-type', '')
+      .find('.login_email, .login_password').val('').end()
+      .find('.login_password').prop('required', false);
+  });
+
   $('.btn-forgot-back').on('click', function() {
     $('.state.present').removeClass('present').addClass('future');
     $('[data-state="auth"]').removeClass('past').addClass('present');
@@ -305,6 +313,7 @@ Fliplet.Widget.instance('login', function(data) {
     $('.btn-reset-pass').html('Resetting...').addClass('disabled');
 
     // Checks if passwords match
+    var email = $('.login_email').val();
     var password = $('.forgot-new-password').val();
     var confirmation = $('.forgot-confirm-password').val();
 
@@ -436,6 +445,8 @@ Fliplet.Widget.instance('login', function(data) {
         email: userData.email,
         legacy: userData.legacy
       });
+
+
     }).then(function() {
       _this.$container.find('.two-factor-btn').removeClass('disabled').html(LABELS.authDefault);
 
