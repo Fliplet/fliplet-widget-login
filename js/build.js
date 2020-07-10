@@ -106,6 +106,9 @@ Fliplet.Widget.instance('login', function(data) {
         if (ssoCredential) {
           // Redirect user to SSO login URL
           var ssoLoginUrl = (Fliplet.Env.get('primaryApiUrl') || Fliplet.Env.get('apiUrl')) + 'v1/auth/login/' + ssoCredential.type + '?token=' + ssoCredential.token;
+          var defaultShare = Fliplet.Navigate.defaults.disableShare;
+
+          Fliplet.Navigate.defaults.disableShare = true;
 
           return new Promise(function (resolve, reject) {
             Fliplet.Navigate.to({
@@ -117,13 +120,14 @@ Fliplet.Widget.instance('login', function(data) {
               onclose: function() {
                 Fliplet.Session.get().then(function(session) {
                   var passport = session && session.accounts && session.accounts.flipletLogin;
+                  var user = _.get(session, 'server.passports.flipletLogin', [])[0];
 
                   if (passport) {
                     session.user = _.extend(session.user, passport[0]);
                     session.user.type = null;
                   }
 
-                  if (!session || !session.user || session.user.type !== null) {
+                  if (!user || !session || !session.user || session.user.type !== null) {
                     return reject('You didn\'t finish the login process.');
                   }
 
@@ -132,7 +136,7 @@ Fliplet.Widget.instance('login', function(data) {
                     id: session.user.id,
                     region: session.auth_token.substr(0, 2),
                     userRoleId: session.user.userRoleId,
-                    authToken: session.user.auth_token,
+                    authToken: user.auth_token,
                     email: session.user.email,
                     legacy: session.legacy
                   }).then(function () {
@@ -146,6 +150,8 @@ Fliplet.Widget.instance('login', function(data) {
                   });
                 });
               }
+            }).then(function () {
+              Fliplet.Navigate.defaults.disableShare = defaultShare;
             });
           }).then(function () {
             onLogin();
@@ -156,6 +162,7 @@ Fliplet.Widget.instance('login', function(data) {
         $form.find('.login_password').focus().prop('required', true);
         calculateElHeight($('.state.present'));
       }).catch(function (error) {
+        $form.find('.btn-continue').html(LABELS.continuDefault).removeClass('disabled');
         Fliplet.UI.Toast.error(error, {
           message: 'There was an error logging in'
         });
@@ -515,6 +522,9 @@ Fliplet.Widget.instance('login', function(data) {
     return new Promise(function (resolve, reject) {
       return Fliplet.App.Storage.get(_this.pvNameStorage)
         .then(function (storage) {
+          var defaultShare = Fliplet.Navigate.defaults.disableShare;
+
+          Fliplet.Navigate.defaults.disableShare = true;
           Fliplet.Navigate.url({
             url: (Fliplet.Env.get('primaryApiUrl') || Fliplet.Env.get('apiUrl')) + 'v1/auth/redirect?auth_token=' + storage.auth_token + '&utm_source=com.fliplet.login',
             inAppBrowser: true,
@@ -529,6 +539,8 @@ Fliplet.Widget.instance('login', function(data) {
                   }
                 });
             }
+          }).then(function (browser) {
+            Fliplet.Navigate.defaults.disableShare = defaultShare;
           });
         })
     });
@@ -565,20 +577,17 @@ Fliplet.Widget.instance('login', function(data) {
 
         return validateWeb()
           .then(function(response) {
-            // Update stored email address based on retrieved response
-            var accountReady = userMustSetupAccount(response)
-              ? goToAccountSetup()
-              : Promise.resolve();
-
-            return accountReady.then(function () {
-              return updateUserData({
-                id: response.user.id,
-                region: response.region,
-                userRoleId: response.user.userRoleId,
-                authToken: response.user.auth_token,
-                email: response.user.email,
-                legacy: response.user.legacy
-              });
+            return updateUserData({
+              id: response.user.id,
+              region: response.region,
+              userRoleId: response.user.userRoleId,
+              authToken: response.user.auth_token,
+              email: response.user.email,
+              legacy: response.user.legacy
+            }).then(function () {
+              if (userMustSetupAccount(response)) {
+                return goToAccountSetup();
+              }
             });
           });
       })
