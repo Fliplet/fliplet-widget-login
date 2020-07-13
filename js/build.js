@@ -19,7 +19,7 @@ Fliplet.Widget.instance('login', function(data) {
   var studioUrls = {
     'https://api.fliplet.test/': 'http://localhost:8080/',
     'https://staging.api.fliplet.com/': 'https://staging2.studio.fliplet.com',
-    'https://api.fliplet.com/': 'https://production.studio.fliplet.com'
+    'https://api.fliplet.com/': 'https://studio.fliplet.com'
   };
 
   // Do not track login related redirects
