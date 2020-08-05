@@ -514,7 +514,7 @@ Fliplet.Widget.instance('login', function(data) {
     data = data || {};
     return data.mustLinkTwoFactor
       || data.mustUpdateProfile
-      || data.mustUpdateAgreements
+      // || data.mustUpdateAgreements
       || _.get(data, 'policy.password.mustBeChanged');
   }
 
