@@ -512,10 +512,23 @@ Fliplet.Widget.instance('login', function(data) {
 
   function userMustSetupAccount(data) {
     data = data || {};
-    return data.mustLinkTwoFactor
-      || data.mustUpdateProfile
-      // || data.mustUpdateAgreements
-      || _.get(data, 'policy.password.mustBeChanged');
+
+    var user = data.user;
+    var organizations = data.organizations;
+    var isOrganizationAdmin = !!_.find(organizations, {
+      organizationUser: {
+        organizationRoleId: 1
+      }
+    });
+
+    var agreements = user.mustReviewAgreements
+    var hasAgreementsToReview = agreements && agreements.length
+      && (agreements.indexOf('tos') === -1 || isOrganizationAdmin)
+
+    return user.mustLinkTwoFactor
+      || user.mustUpdateProfile
+      || hasAgreementsToReview
+      || _.get(user, 'policy.password.mustBeChanged');
   }
 
   function goToAccountSetup() {
@@ -577,13 +590,15 @@ Fliplet.Widget.instance('login', function(data) {
 
         return validateWeb()
           .then(function(response) {
+            var user = response.user || {};
+
             return updateUserData({
-              id: response.user.id,
-              region: response.region,
-              userRoleId: response.user.userRoleId,
-              authToken: response.user.auth_token,
-              email: response.user.email,
-              legacy: response.user.legacy
+              id: user.user.id,
+              region: user.region,
+              userRoleId: user.user.userRoleId,
+              authToken: user.user.auth_token,
+              email: user.user.email,
+              legacy: user.user.legacy
             }).then(function () {
               if (userMustSetupAccount(response)) {
                 return goToAccountSetup();
@@ -616,11 +631,24 @@ Fliplet.Widget.instance('login', function(data) {
     // validate token
     return Fliplet.App.Storage.get(_this.pvNameStorage)
       .then(function(storage) {
-        return request({
-          method: 'GET',
-          url: 'v1/user',
-          token: storage.auth_token
-        });
+        return Promise.all([
+          request({
+            method: 'GET',
+            url: 'v1/user',
+            token: storage.auth_token
+          }),
+          request({
+            method: 'GET',
+            url: 'v1/organizations',
+            token: storage.auth_token
+          })
+        ]);
+      })
+      .then(function (response) {
+        return {
+          user: response[0],
+          organizations: _.get(response, '1.organizations', [])
+        }
       });
   }
 
